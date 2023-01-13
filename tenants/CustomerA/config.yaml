@@ -1,0 +1,69 @@
+---
+fmg_host: 34.140.57.94:14006
+fmg_user: admin
+fmg_password: fortinet
+fmg_adom: CustomerA
+
+postman_collection: tenants/shared/Managed_SDWAN_7_2_x.postman.json
+
+fgfm_ip: 192.168.0.15
+fgt_user: admin
+fgt_password: fortinet
+
+sites:
+  site1-1:
+    ip: 34.140.57.94
+    port: 11007
+    latitude: 44.837789
+    longitude: -0.57918
+    address: Bordeaux, France
+  site1-2:
+    ip: 34.140.57.94
+    port: 11008
+    latitude: 44.494887
+    longitude: 11.3426163
+    address: Bologna, Italy
+  site1-H1:
+    ip: 34.140.57.94
+    port: 11009
+    latitude: 48.856614
+    longitude: 2.3522219
+    address: Paris, France
+  site1-H2:
+    ip: 34.140.57.94
+    port: 11010
+    latitude: 52.3675734
+    longitude: 4.9041389
+    address: Amsterdam, The Netherlands
+
+tasks:
+  - name: Create Foundation
+    type: postman
+    folder: Foundation
+  - name: Create Variables
+    type: postman
+    folder: CustomerA - Create Variables
+  - name: Import Project Template
+    type: cli_templates
+    src: tenants/CustomerA/Project.j2
+  - name: Import Jinja CLI Templates
+    type: cli_templates
+    src: tenants/shared/sdwan-advpn-reference/bgp-on-loopback/*.j2
+  - name: Create CLI Template Groups
+    type: postman
+    folder: Create CLI Template Groups
+  - name: Create Device Blueprints
+    type: postman
+    folder: Device Blueprints
+  - name: Create Model Devices
+    type: model_devices
+    src: tenants/CustomerA/CustomerA.devices.csv
+  - name: Install Model Devices
+    type: postman
+    folder: Model Devices
+  - name: Add Legacy Site
+    type: postman
+    folder: CustomerA - Hub-to-Edge SD-WAN
+  - name: Onboard Devices
+    type: onboard
+    src: tenants/CustomerA/CustomerA.devices.csv
