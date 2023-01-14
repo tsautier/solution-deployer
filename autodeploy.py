@@ -79,6 +79,9 @@ def main():
 
     success, fail = 0, 0
     for i, task in enumerate(cfg['tasks'], start=1):
+        if fail and cfg.get('halt_on_fail', True):
+            print(f"\033[91m\033[1mHALT ON FAIL:\033[0m Halting here, because the previous task has failed!") 
+            break
         print()
         print(f"TASK {i}: {task['name']}")
         print("---------------------------------------------------")
