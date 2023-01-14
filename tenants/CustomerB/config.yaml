@@ -1,5 +1,5 @@
 ---
-fmg_host: 34.140.57.94:14006
+fmg_host: 192.168.0.15
 fmg_user: admin
 fmg_password: fortinet
 fmg_adom: CustomerB
@@ -12,26 +12,22 @@ fgt_password: fortinet
 
 sites:
   site1-1:
-    ip: 34.140.57.94
-    port: 11007
+    ip: 192.168.0.31
     latitude: 44.837789
     longitude: -0.57918
     address: Bordeaux, France
   site1-2:
-    ip: 34.140.57.94
-    port: 11008
+    ip: 192.168.0.32
     latitude: 44.494887
     longitude: 11.3426163
     address: Bologna, Italy
   site1-H1:
-    ip: 34.140.57.94
-    port: 11009
+    ip: 192.168.0.41
     latitude: 48.856614
     longitude: 2.3522219
     address: Paris, France
   site1-H2:
-    ip: 34.140.57.94
-    port: 11010
+    ip: 192.168.0.42
     latitude: 52.3675734
     longitude: 4.9041389
     address: Amsterdam, The Netherlands
@@ -48,7 +44,7 @@ tasks:
     src: tenants/CustomerB/Project.j2
   - name: Import Jinja CLI Templates
     type: cli_templates
-    src: tenants/shared/sdwan-advpn-reference/bgp-on-loopback-multi-vrf/*.j2
+    src: tenants/shared/sdwan-advpn-reference-release-7.2/bgp-on-loopback-multi-vrf/*.j2
   - name: Create CLI Template Groups
     type: postman
     folder: Create CLI Template Groups
@@ -57,10 +53,10 @@ tasks:
     folder: Device Blueprints
   - name: Create Model Devices
     type: model_devices
-    src: tenants/CustomerB/CustomerB.devices.csv
+    src: tenants/CustomerB/inventory.CustomerB.csv
   - name: Install Model Devices
     type: postman
     folder: Model Devices
   - name: Onboard Devices
     type: onboard
-    src: tenants/CustomerB/CustomerB.devices.csv
+    src: tenants/CustomerB/inventory.CustomerB.csv
