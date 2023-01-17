@@ -16,12 +16,6 @@ echo ---------------------------------------------------------------------------
 wget -O tenants/shared/Managed_SDWAN_7_2_x.postman.json https://raw.githubusercontent.com/fortinet-solutions-cse/postman_collections/7.2.x/Managed_SDWAN_7_2_x.postman.json 
 
 echo
-echo ---------------------------
-echo Copying Project Template...
-echo ---------------------------
-unzip -o -j ../projects.zip 'projects/CustomerA/Project.j2' -d tenants/CustomerA
-
-echo
 echo ------------------------------
 echo Generating device inventory...
 echo ------------------------------
