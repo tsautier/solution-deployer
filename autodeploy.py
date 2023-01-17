@@ -18,7 +18,8 @@ def importCLITemplateTask(session, task):
             session.addCLITemplate(
                 template_name = os.path.basename(os.path.splitext(t)[0]),
                 content = f.read(),
-                type = task.get('syntax', 'jinja')
+                type = task.get('syntax', 'jinja'),
+                prerun = task.get('prerun', False)
             )
 
 def createModelDevicesTask(session, task):
@@ -39,7 +40,7 @@ def createModelDevicesTask(session, task):
     print(f"Variables: {[var for var in vars.keys()]}")
     session.addModelDevices(dev_list)
     session.setVariables(vars)
-    session.assignCLITemplate("provision_interfaces_on_vm", dev_list)                
+    session.assignCLITemplate(task.get('prerun', 'provision_interfaces_on_vm'), dev_list)                
 
 def onboardDevicesTask(cfg, task):
     print(f"Factory-resetting devices from {task['src']}...")
