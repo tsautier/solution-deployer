@@ -1,0 +1,15 @@
+config system admin
+    edit admin
+        set accprofile "super_admin"
+        set vdom "root"
+        set password fortinet
+    next
+end
+config system interface
+{%- for i in range(0, vm_interface_number|int) %}
+    edit port{{i+1}}
+        set vdom root
+        set type physical
+    next
+{%- endfor %}
+end
