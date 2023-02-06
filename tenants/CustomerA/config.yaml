@@ -45,10 +45,6 @@ tasks:
   - name: Import Jinja CLI Templates
     type: cli_templates
     src: tenants/shared/sdwan-advpn-reference-release-7.2/bgp-on-loopback/*.j2
-  - name: Import FGT-VM Initialization Template (Pre-Run CLI)
-    type: cli_templates
-    src: tenants/shared/FGTVM-init.j2
-    prerun: true
   - name: Create CLI Template Groups
     type: postman
     folder: Create CLI Template Groups
@@ -58,7 +54,6 @@ tasks:
   - name: Create Model Devices
     type: model_devices
     src: tenants/CustomerA/inventory.CustomerA.csv
-    prerun: FGTVM-init
   - name: Install Model Devices
     type: postman
     folder: Model Devices
