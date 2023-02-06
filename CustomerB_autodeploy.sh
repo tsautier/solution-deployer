@@ -20,7 +20,7 @@ echo ------------------------------
 echo Generating device inventory...
 echo ------------------------------
 ./generate_inventory.py | grep -A 7 "inventory.CustomerB.csv" | tail -n +3 > tenants/CustomerB/inventory.CustomerB.csv
-cat tenants/CustomerA/inventory.CustomerA.csv
+cat tenants/CustomerB/inventory.CustomerB.csv
 
 echo
 echo ---------------------------------------
