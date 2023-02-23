@@ -4,3 +4,4 @@ __pycache__/*
 tenants/shared/*.json
 tenants/shared/?*/*
 tenants/Workshop/*
+*.tgz
