@@ -2,6 +2,7 @@
 
 import os, glob, csv
 from paramiko import SSHClient, AutoAddPolicy
+from paramiko_expect import SSHClientInteraction
 from yaml import safe_load
 from fmg_api.api_base import ApiSession
 
@@ -104,8 +105,12 @@ def onboardDevicesTask(cfg, task):
                 username = cfg['fgt_user'],
                 password = cfg['fgt_password']
             )
-            stdin, stdout, stderr = client.exec_command('execute factoryreset2 keepvmlicense\ny')
-            stdout.read(20)
+            interact = SSHClientInteraction(client, display=True)
+            interact.expect('.*# ')
+            interact.send('execute factoryreset2 keepvmlicense')
+            interact.expect('.*\(y/n\)')
+            interact.send('y')
+            interact.expect('.*')            
         except Exception as e:
             fail += 1
             print(f"\033[91m\033[1mFAILED:\033[0m {e}") 
