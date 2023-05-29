@@ -87,10 +87,16 @@ def createModelDevicesTask(session, task):
     session.assignCLITemplate(task.get('prerun', 'provision_interfaces_on_vm'), dev_list)                
 
 def onboardDevicesTask(cfg, task):
-    print(f"Factory-resetting devices from {task['src']}...")
-    print("NOTE: We won't wait until they finish ZTP process, so check it afterwards!")
-    with open(task['src'], 'r', encoding='utf-8-sig') as f:
-        dev_list = [ d['name'] for d in csv.DictReader(f) ]
+    if 'src' in task:
+        print(f"Factory-resetting devices from {task['src']}...")
+        print("NOTE: We won't wait until they finish ZTP process, so check it afterwards!")
+        with open(task['src'], 'r', encoding='utf-8-sig') as f:
+            dev_list = [ d['name'] for d in csv.DictReader(f) ]
+    elif 'site' in task:
+        print(f"Factory-resetting device {task['site']}...")
+        print("NOTE: We won't wait until it finishes ZTP process, so check it afterwards!")
+        dev_list = [ task['site'] ]
+        
     fail = 0
     for d in dev_list:
         print(f"--> {d}")
