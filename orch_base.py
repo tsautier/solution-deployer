@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import os, glob, csv
-from paramiko import SSHClient, AutoAddPolicy
+from paramiko import SSHClient, AutoAddPolicy, ssh_exception
 from paramiko_expect import SSHClientInteraction
 from yaml import safe_load
 from fmg_api.api_base import ApiSession
@@ -104,19 +104,15 @@ def onboardDevicesTask(cfg, task):
         client = SSHClient()
         client.set_missing_host_key_policy(AutoAddPolicy())
         try:
-            print(f"Connecting to {fgt['ip']} with {cfg['fgt_user']} / {cfg['fgt_password']}")
-            client.connect(
-                fgt['ip'],
-                port = fgt.get('port', 22),
-                username = cfg['fgt_user'],
-                password = cfg['fgt_password']
-            )
-            interact = SSHClientInteraction(client, display=True)
-            interact.expect('.*# ')
-            interact.send('execute factoryreset2 keepvmlicense')
-            interact.expect('.*\(y/n\)')
-            interact.send('y')
-            interact.expect('.*')            
+            __factoryResetDevice(client, fgt, cfg)
+        except ssh_exception.AuthenticationException as e:
+            print(f"\033[91m\033[1mAuthentication failed,\033[0m trying an empty password (in case it is not set yet)...") 
+            try:
+                __setNewPassword(client, fgt, cfg)
+                __factoryResetDevice(client, fgt, cfg)
+            except ssh_exception.AuthenticationException as e:
+                fail += 1
+                print(f"\033[91m\033[1mFAILED:\033[0m {e}") 
         except Exception as e:
             fail += 1
             print(f"\033[91m\033[1mFAILED:\033[0m {e}") 
@@ -124,3 +120,38 @@ def onboardDevicesTask(cfg, task):
             client.close()
     if fail:
         raise Exception("At least some of the devices failed to onboard!")
+    
+def __factoryResetDevice(client, fgt, cfg):
+    print(f"Connecting to {fgt['ip']} with {cfg['fgt_user']} / {cfg['fgt_password']}")
+    client.connect(
+        fgt['ip'],
+        port = fgt.get('port', 22),
+        username = cfg['fgt_user'],
+        password = cfg['fgt_password']
+    )
+    interact = SSHClientInteraction(client, display=True)
+    print('>')
+    interact.expect('.*# ')
+    interact.send('execute factoryreset2 keepvmlicense')
+    interact.expect('.*\(y/n\)')
+    interact.send('y')
+    interact.expect('.*')       
+    print('<')
+
+def __setNewPassword(client, fgt, cfg):
+    print(f"Connecting to {fgt['ip']} with {cfg['fgt_user']} and trying to set the new password to {cfg['fgt_password']}")
+    client.connect(
+        fgt['ip'],
+        port = fgt.get('port', 22),
+        username = cfg['fgt_user'],
+        password = ""
+    )            
+    interact = SSHClientInteraction(client, display=True)
+    print('>')
+    interact.expect('New Password: ')
+    interact.send(cfg['fgt_password'])
+    interact.expect('Confirm Password: ')
+    interact.send(cfg['fgt_password'])
+    interact.expect('.*')    
+    print('<')       
+    print("The new password has been set successfully!")    
