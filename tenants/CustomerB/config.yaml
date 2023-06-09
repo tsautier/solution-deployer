@@ -42,7 +42,7 @@ tasks:
     folder: Foundation
   - name: Variables and Firewall Rules
     type: postman
-    folder: CustomerB - Create Variables 
+    folder: CustomerB - VRF-Aware
   - name: Import Project Template
     type: cli_templates
     src: /Users/dperets/Desktop/projects/CustomerB/Project.j2
