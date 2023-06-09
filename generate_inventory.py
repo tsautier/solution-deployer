@@ -2,22 +2,36 @@
 
 import csv, io
 from yaml import safe_load
-from paramiko import SSHClient, AutoAddPolicy
+from paramiko import SSHClient, AutoAddPolicy, ssh_exception
+from contextlib import redirect_stdout
 from orch_base import *
 
-def getSN(fgt, fgt_user, fgt_password):
-    client = SSHClient()
-    client.set_missing_host_key_policy(AutoAddPolicy())
+def __doGetSN(client, fgt, cfg):
     client.connect(
         fgt['ip'],
         port = fgt.get('port', 22),
-        username = fgt_user,
-        password = fgt_password
+        username = cfg['fgt_user'],
+        password = cfg['fgt_password']
     )
     stdin, stdout, stderr = client.exec_command('get system status')
-    sn = next(l.split(': ')[1].strip() for l in stdout.readlines() if ("Serial-Number" in l))
-    client.close()
+    return next(l.split(': ')[1].strip() for l in stdout.readlines() if ("Serial-Number" in l))
+
+def getSN(fgt_name, cfg):
+    fgt = cfg['sites'][fgt_name]
+    client = SSHClient()
+    client.set_missing_host_key_policy(AutoAddPolicy())
+
+    try:
+        sn = __doGetSN(client, fgt, cfg)
+    except ssh_exception.AuthenticationException as e:
+        with (redirect_stdout(io.StringIO())):
+            setNewPassword(client, fgt, cfg)
+        sn = __doGetSN(client, fgt, cfg)
+    finally:
+        client.close()
+
     return sn
+
 
 def printInventory(cfg, in_file):
     with open(in_file, 'r', encoding='utf-8-sig') as f, io.StringIO() as s:
@@ -25,7 +39,7 @@ def printInventory(cfg, in_file):
         csvOut = csv.DictWriter(s, csvIn.fieldnames)
         csvOut.writeheader()
         for d in csvIn:
-            d['sn'] = getSN(cfg['sites'][d['name']], cfg['fgt_user'], cfg['fgt_password'])
+            d['sn'] = getSN(d['name'], cfg)
             csvOut.writerow(d)
         print(s.getvalue())
 
