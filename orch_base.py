@@ -108,7 +108,7 @@ def onboardDevicesTask(cfg, task):
         except ssh_exception.AuthenticationException as e:
             print(f"\033[91m\033[1mAuthentication failed,\033[0m trying an empty password (in case it is not set yet)...") 
             try:
-                __setNewPassword(client, fgt, cfg)
+                setNewPassword(client, fgt, cfg)
                 __factoryResetDevice(client, fgt, cfg)
             except ssh_exception.AuthenticationException as e:
                 fail += 1
@@ -138,7 +138,7 @@ def __factoryResetDevice(client, fgt, cfg):
     interact.expect('.*')       
     print('<')
 
-def __setNewPassword(client, fgt, cfg):
+def setNewPassword(client, fgt, cfg):
     print(f"Connecting to {fgt['ip']} with {cfg['fgt_user']} and trying to set the new password to {cfg['fgt_password']}")
     client.connect(
         fgt['ip'],
