@@ -82,6 +82,7 @@ def createModelDevicesTask(session, task):
                 vars[k][dev_name] = v
     print(f"Devices: {[dev['name'] for dev in dev_list]}")
     print(f"Variables: {[var for var in vars.keys()]}")
+    session.deleteDevices(dev_list, adom='root')
     session.addModelDevices(dev_list)
     session.setVariables(vars)
     session.assignCLITemplate(task.get('prerun', 'provision_interfaces_on_vm'), dev_list)                

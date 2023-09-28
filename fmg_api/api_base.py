@@ -249,7 +249,7 @@ class ApiSession:
         self._run_request(payload, name=f"Assign CLI Template ({template_name})")
 
     ##############################################################
-    # Add Model Device
+    # Add Model Devices
     ##############################################################
     def addModelDevices(self, dev_list):
 
@@ -284,6 +284,56 @@ class ApiSession:
         }
         
         self._run_request_async(payload, name="Add Model Devices")
+
+    ##############################################################
+    # Delete Devices
+    ##############################################################
+    def deleteDevices(self, dev_list, adom=None):
+
+        # Waiting for the fix: mantis 0874856
+        # del_dev_list = []
+        # for dev in dev_list:
+        #     del_dev_list.append({
+        #         "name": dev['name'],
+        #         "vdom": "root"
+        #     })
+        #
+        # payload = {
+        #     "session": self._session,
+        #     "id": 1,
+        #     "method": "exec",
+        #     "params": [
+        #         {
+        #             "url": "/dvm/cmd/del/dev-list",
+        #             "data": {
+        #                 "adom": adom or self.adom,
+        #                 "flags": [ "create_task", "nonblocking" ],
+        #                 "del-dev-member-list": del_dev_list
+        #             }
+        #         }
+        #     ]
+        # }
+        #
+        # self._run_request_async(payload, name=f"Delete Devices from {adom or self.adom}")  
+          
+        for dev in dev_list:
+            if (self.getDevice(dev['name'], adom=adom)):
+                payload = {
+                    "session": self._session,
+                    "id": 1,
+                    "method": "exec",
+                    "params": [
+                        {
+                            "url": "/dvm/cmd/del/device",
+                            "data": {
+                                "adom": adom or self.adom,
+                                "device": dev['name'],
+                                "flags": [ "create_task", "nonblocking" ]
+                            }
+                        }
+                    ]
+                }
+                self._run_request_async(payload, name=f"Delete Device {dev['name']} from {adom or self.adom}")             
 
     ##############################################################
     # Set Variables
@@ -321,3 +371,41 @@ class ApiSession:
         }
         
         self._run_request(payload, name="Set Variables")        
+
+    ##############################################################
+    # Get Device
+    ##############################################################
+
+    def getDevice(self, dev_name, adom=None):
+
+        payload = {
+            "session": self._session,
+            "id": 1,
+            "method": "get",
+            "params": [
+                {
+                    "url": "/dvmdb/adom/" + (adom or self.adom) + "/device",
+                    "filter": [
+                        "name",
+                        "==",
+                        dev_name
+                    ],
+                    "fields": [
+                        "name",
+                        "ip",
+                        "platform_str"
+                    ]
+                }
+            ]
+        }
+
+        content = self._run_request(payload, name=f"Get Device {dev_name} in {adom or self.adom}")
+        if (content['result'][0]['data']):
+            dev = content['result'][0]['data'][0]
+            return {
+                'name': dev['name'],
+                'ip': dev['ip'],
+                'platform_str': dev['platform_str']
+            }
+        else:
+            return False
