@@ -32,27 +32,27 @@ config firewall vip
 end
 config router static
     edit 1
-        set gateway 10.199.1.1
+        set gateway {{port1_gw}}
         set distance 1
         set device "port1"
     next
     edit 2
-        set gateway 10.199.2.1
+        set gateway {{port2_gw}}
         set distance 1
         set device "port2"
     next
     edit 3
-        set gateway 10.199.3.1
+        set gateway {{port3_gw}}
         set distance 1
         set device "port3"
     next
     edit 4
-        set gateway 10.199.4.1
+        set gateway {{port4_gw}}
         set distance 1
         set device "port4"
     next
     edit 5
-        set gateway 10.199.5.1
+        set gateway {{port5_gw}}
         set distance 1
         set device "port5"
     next

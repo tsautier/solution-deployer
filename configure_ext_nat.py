@@ -18,7 +18,11 @@ def main():
     for str in output:
         params = [ v.rstrip() for v in str.split(' ') if '=' in v ]
         intf = { p.split('=')[0]: p.split('=')[1] for p in params }
-        if intf: vars[intf['devname']] = intf['IP'].split('->')[0]
+        if intf: 
+            ip = intf['IP'].split('->')[0]
+            gw = ip.rsplit('.', 1)[0]+'.1'
+            vars[intf['devname']] = ip
+            vars[intf['devname']+'_gw'] = gw
     
     task = {
         'src': 'tenants/shared/zz_ext.j2',
