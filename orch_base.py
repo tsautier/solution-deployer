@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import os, glob, csv
+import os, glob, csv, jinja2
 from paramiko import SSHClient, AutoAddPolicy, ssh_exception
 from paramiko_expect import SSHClientInteraction
 from yaml import safe_load
@@ -121,7 +121,74 @@ def onboardDevicesTask(cfg, task):
             client.close()
     if fail:
         raise Exception("At least some of the devices failed to onboard!")
+
+def runCLICommandTask(cfg, task):
+    print(f"Running CLI on {task['site']}...")
+    print(f"CLI: {task['cli']}")
+    output = __runOnDevice(
+        fgt = cfg['sites'][task['site']],
+        action = __applyCLIConfig,
+        cfg = cfg,
+        action_args = task['cli']
+    )
+    if not output:
+        raise Exception("Failed to run CLI!")
+    return output
+
+def applyCLIConfigTask(cfg, task):
+    todo = {}
+    if 'site' in task and len(glob.glob(task['src'])) == 1:
+        print(f"Running CLI from {task['src']} on {task['site']}...")
+        todo[task['site']] = task['src']
+    elif 'src' in task:
+        print(f"Running CLI from {task['src']} on respective devices...")
+        for c in glob.glob(task['src']):
+            d = os.path.basename(os.path.splitext(c)[0])
+            todo[d] = c
+
+    fail = 0
+    for d,c in todo.items():
+        print(f"--> {d}")
+        env = jinja2.Environment(
+            loader=jinja2.FileSystemLoader(os.path.dirname(c)),
+            undefined=jinja2.StrictUndefined
+        )
+        rendered = env.get_template(os.path.basename(c)).render(task.get('vars', {}))
+        print(rendered)
+        if not __runOnDevice(
+            fgt = cfg['sites'][d],
+            action = __applyCLIConfig,
+            cfg = cfg,
+            action_args = rendered
+        ): fail+=1
     
+    if fail:
+        raise Exception("Failed to apply CLI config to at least some of the devices!")
+
+###################
+# Helper Functions
+###################
+
+def __runOnDevice(fgt, action, cfg, action_args=None):
+    output = None
+    client = SSHClient()
+    client.set_missing_host_key_policy(AutoAddPolicy())
+    try:
+        output = action(client, fgt, cfg, action_args)
+    except ssh_exception.AuthenticationException as e:
+        print(f"\033[91m\033[1mAuthentication failed,\033[0m trying an empty password (in case it is not set yet)...") 
+        try:
+            setNewPassword(client, fgt, cfg)
+            output = action(client, fgt, cfg, action_args)
+        except ssh_exception.AuthenticationException as e:
+            print(f"\033[91m\033[1mFAILED:\033[0m {e}") 
+    except Exception as e:
+        print(f"\033[91m\033[1mFAILED:\033[0m {e}") 
+    finally:
+        client.close()
+
+    return output
+
 def __factoryResetDevice(client, fgt, cfg):
     print(f"Connecting to {fgt['ip']} with {cfg['fgt_user']} / {cfg['fgt_password']}")
     client.connect(
@@ -138,6 +205,19 @@ def __factoryResetDevice(client, fgt, cfg):
     interact.send('y')
     interact.expect('.*')       
     print('<')
+
+def __applyCLIConfig(client, fgt, cfg, cli_config):
+    print(f"Connecting to {fgt['ip']} with {cfg['fgt_user']} / {cfg['fgt_password']}")
+    client.connect(
+        fgt['ip'],
+        port = fgt.get('port', 22),
+        username = cfg['fgt_user'],
+        password = cfg['fgt_password'],
+        timeout = 10
+    )    
+    stdin, stdout, stderr = client.exec_command(cli_config)
+    return stdout.readlines()    
+    
 
 def setNewPassword(client, fgt, cfg):
     print(f"Connecting to {fgt['ip']} with {cfg['fgt_user']} and trying to set the new password to {cfg['fgt_password']}")
