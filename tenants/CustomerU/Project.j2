@@ -14,11 +14,6 @@
     - loopback
     - profile
     - region
-    - isp1_intf
-    - isp2_intf
-    - mpls_intf
-    - lan_intf
-    - lan_ip
     - west_h1_isp1
     - west_h1_isp2
     - west_h1_mpls
@@ -28,6 +23,14 @@
     - east_h1_isp1
     - east_h1_isp2
     - east_h1_mpls    
+  - Depending on topology:
+    - isp1_intf
+    - isp2_intf
+    - mpls_intf
+    - lan_intf
+    - lan_ip
+    - lan2_intf
+    - lan2_ip
 #}
 
 {# Optional defaults (can be overriden by profiles) #}
@@ -81,6 +84,11 @@
           'name': lan_intf,
           'role': 'lan',
           'ip': lan_ip
+        },
+        {
+          'name': lan2_intf,
+          'role': 'lan',
+          'ip': lan2_ip
         }
       ]
     }
