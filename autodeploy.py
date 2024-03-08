@@ -23,6 +23,8 @@ def main():
                 runPostmanTask(cfg, session, task)
             elif task['type'] == 'cli_templates':
                 importCLITemplateTask(session, task)
+            elif task['type'] == 'delete_devices':
+                deleteDevicesTask(session, task)
             elif task['type'] == 'model_devices':
                 createModelDevicesTask(session, task)
             elif task['type'] == 'onboard':

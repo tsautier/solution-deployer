@@ -31,7 +31,7 @@ def getApiSession(cfg):
     )
     return session
 
-def getNewmanCommand(cfg, session):
+def getNewmanCommand(cfg, session, vars={}):
     command = []
     command.append('newman run')
     command.append('"' + cfg['postman_collection'] + '"')
@@ -41,6 +41,7 @@ def getNewmanCommand(cfg, session):
     command.append('--env-var "password=' + cfg['fmg_password'] + '"')
     command.append('--env-var "adom=' + cfg['fmg_adom'] + '"')
     command.append('--env-var "session=' + session.getSessionCookie() + '"')
+    for k,v in vars.items(): command.append('--env-var "' + k + '=' + v + '"')
     return command
 
 
@@ -50,7 +51,11 @@ def getNewmanCommand(cfg, session):
 
 def runPostmanTask(cfg, session, task):
     print(f"Running Postman collection - {task['folder']}...")
-    command = getNewmanCommand(cfg, session)
+    vars = {}
+    if 'vars' in task:
+        with open(task['vars'], 'r') as varfile:
+            vars = safe_load(varfile)
+    command = getNewmanCommand(cfg, session, vars)
     command.append(f"--folder \"{task['folder']}\"")
     if os.system(' '.join(command)): 
         raise Exception("Postman run ended with error(s)!")
@@ -65,6 +70,13 @@ def importCLITemplateTask(session, task):
                 type = task.get('syntax', 'jinja'),
                 prerun = task.get('prerun', False)
             )
+
+def deleteDevicesTask(session, task):
+    print(f"Deleting Devices from {task['adom']}...")
+    session.deleteDevices(
+        session.getDevices(adom=task['adom']),
+        adom=task['adom']
+    )
 
 def createModelDevicesTask(session, task):
     print(f"Creating Model Devices from {task['src']}...")
@@ -82,7 +94,10 @@ def createModelDevicesTask(session, task):
                 vars[k][dev_name] = v
     print(f"Devices: {[dev['name'] for dev in dev_list]}")
     print(f"Variables: {[var for var in vars.keys()]}")
-    session.deleteDevices(dev_list, adom='root')
+    session.deleteDevices(
+        session.getDevices('root'),
+        adom='root'
+    )    
     session.addModelDevices(dev_list)
     session.setVariables(vars)
     session.assignCLITemplate(task.get('prerun', 'provision_interfaces_on_vm'), dev_list)                

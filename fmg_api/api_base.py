@@ -263,7 +263,7 @@ class ApiSession:
                 "sn": dev['sn'],
                 "os_type": 0,
                 "os_ver": dev.get('os_ver', 7),
-                "mr": dev.get('os_mr', 2),
+                "mr": dev.get('os_mr', 4),
                 "adm_usr": "admin"
             })
 
@@ -290,50 +290,31 @@ class ApiSession:
     ##############################################################
     def deleteDevices(self, dev_list, adom=None):
 
-        # Waiting for the fix: mantis 0874856
-        # del_dev_list = []
-        # for dev in dev_list:
-        #     del_dev_list.append({
-        #         "name": dev['name'],
-        #         "vdom": "root"
-        #     })
-        #
-        # payload = {
-        #     "session": self._session,
-        #     "id": 1,
-        #     "method": "exec",
-        #     "params": [
-        #         {
-        #             "url": "/dvm/cmd/del/dev-list",
-        #             "data": {
-        #                 "adom": adom or self.adom,
-        #                 "flags": [ "create_task", "nonblocking" ],
-        #                 "del-dev-member-list": del_dev_list
-        #             }
-        #         }
-        #     ]
-        # }
-        #
-        # self._run_request_async(payload, name=f"Delete Devices from {adom or self.adom}")  
-          
+        if not dev_list: return
+        
+        del_dev_list = []
         for dev in dev_list:
-            if (self.getDevice(dev['name'], adom=adom)):
-                payload = {
-                    "session": self._session,
-                    "id": 1,
-                    "method": "exec",
-                    "params": [
-                        {
-                            "url": "/dvm/cmd/del/device",
-                            "data": {
-                                "adom": adom or self.adom,
-                                "device": dev['name'],
-                                "flags": [ "create_task", "nonblocking" ]
-                            }
-                        }
-                    ]
+            del_dev_list.append({
+                "name": dev['name'],
+                "vdom": "root"
+            })
+        
+        payload = {
+            "session": self._session,
+            "id": 1,
+            "method": "exec",
+            "params": [
+                {
+                    "url": "/dvm/cmd/del/dev-list",
+                    "data": {
+                        "adom": adom or self.adom,
+                        "del-dev-member-list": del_dev_list
+                    }
                 }
-                self._run_request_async(payload, name=f"Delete Device {dev['name']} from {adom or self.adom}")             
+            ]
+        }
+        
+        self._run_request(payload, name=f"Delete Devices from {adom or self.adom}")  
 
     ##############################################################
     # Set Variables
@@ -371,6 +352,41 @@ class ApiSession:
         }
         
         self._run_request(payload, name="Set Variables")        
+
+    ##############################################################
+    # Get Devices
+    ##############################################################
+
+    def getDevices(self, adom=None):
+
+        payload = {
+            "session": self._session,
+            "id": 1,
+            "method": "get",
+            "params": [
+                {
+                    "url": "/dvmdb/adom/" + (adom or self.adom) + "/device",
+                    "fields": [
+                        "name",
+                        "ip",
+                        "platform_str"
+                    ]
+                }
+            ]
+        }
+
+        content = self._run_request(payload, name=f"Get Devices in {adom or self.adom}")
+        dev_list = []
+        for dev in content['result'][0]['data']:
+            dev_list.append(
+                {
+                    'name': dev['name'],
+                    'ip': dev['ip'],
+                    'platform_str': dev['platform_str']
+                }
+            )
+
+        return dev_list
 
     ##############################################################
     # Get Device
