@@ -68,7 +68,15 @@ def main():
         print()
         print("inventory.CustomerC.csv")
         print("=======================")            
-        printInventory(cfg, tenantdir + '/inventory.CustomerC.j2')        
+        printInventory(cfg, tenantdir + '/inventory.CustomerC.j2')       
+
+    tenantdir = "tenants/CustomerU"
+    with open(tenantdir + '/config.yaml', 'r') as cfgfile:
+        cfg = safe_load(cfgfile)
+        print()
+        print("inventory.CustomerU.csv")
+        print("=======================")            
+        printInventory(cfg, tenantdir + '/inventory.CustomerU.j2')            
 
 
 if __name__ == "__main__":

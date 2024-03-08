@@ -1,0 +1,55 @@
+---
+fmg_host: 192.168.0.15
+fmg_user: admin
+fmg_password: fortinet
+fmg_adom: CustomerU
+
+postman_collection: tenants/shared/Managed_SDWAN_7_4_x.postman.json
+
+fgfm_ip: 192.168.0.15
+fgt_user: admin
+fgt_password: fortinet
+
+sites:
+  site1-1:
+    ip: 192.168.0.31
+  site1-2:
+    ip: 192.168.0.32
+  site2-1:
+    ip: 192.168.0.33
+  site1-H1:
+    ip: 192.168.0.41
+  site1-H2:
+    ip: 192.168.0.42
+  site2-H1:
+    ip: 192.168.0.43
+
+tasks:
+  - name: Create Foundation
+    type: postman
+    folder: Foundation
+  - name: Import Project Template
+    type: cli_templates
+    src: tenants/CustomerU/Project.j2
+  - name: Import Jinja CLI Templates
+    type: cli_templates
+    src: tenants/shared/sdwan-advpn-reference-devel-7.4/dynamic-bgp-on-lo/*.j2
+  - name: Create CLI Template Groups
+    type: postman
+    folder: Create CLI Template Groups
+  - name: Fine-tune Customer ADOM
+    type: postman
+    folder: CustomerU - SD-WAN
+    vars: tenants/CustomerU/postman.vars.yaml
+  - name: Cleanup Unauthorized Devices
+    type: delete_devices
+    adom: root
+  - name: Create Model Devices
+    type: model_devices
+    src: tenants/CustomerU/inventory.CustomerU.csv    
+  - name: Install Model Devices (Staging)
+    type: postman
+    folder: CustomerU - Staging
+  - name: Onboard Devices
+    type: onboard
+    src: tenants/CustomerU/inventory.CustomerU.csv
