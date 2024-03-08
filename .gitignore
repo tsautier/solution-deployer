@@ -5,3 +5,4 @@ tenants/shared/*.json
 tenants/shared/?*/*
 tenants/Workshop/*
 *.tgz
+*.csv
