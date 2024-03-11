@@ -1,12 +1,30 @@
 #!/usr/bin/env python3
 
+import argparse
 from orch_base import *
 
 def main():
-    
+
+    # Config from config.yaml
     cfg = readConfig()
     session = getApiSession(cfg)
-    
+
+    # Command-line arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--tags', metavar="TAG1,TAG2,...",
+        help='tags to execute (comma-delimited)',
+        type=lambda s: [t for t in s.split(',')],
+        default=cfg.get('default_tags', None)
+    )
+    parser.add_argument(
+        '--skip-tags', metavar="TAG1,TAG2,...",
+        help='tags to skip (comma-delimited)',
+        type=lambda s: [t for t in s.split(',')],
+        default=cfg.get('default_skip_tags', None)
+    )
+    args = parser.parse_args()
+   
     print()
     print("Running automated deployment sequence...")
 
@@ -18,6 +36,11 @@ def main():
         print()
         print(f"TASK {i}: {task['name']}")
         print("---------------------------------------------------")
+        if (args.skip_tags and task.get('tag', '') in args.skip_tags) or \
+           (args.tags and task.get('tag', '') not in args.tags):
+            print("\033[35mSKIPPED by tag\033[0m")
+            continue
+
         try:
             if task['type'] == 'postman':
                 runPostmanTask(cfg, session, task)
