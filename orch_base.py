@@ -44,6 +44,23 @@ def getNewmanCommand(cfg, session, vars={}):
     for k,v in vars.items(): command.append('--env-var "' + k + '=' + v + '"')
     return command
 
+def setNewPassword(client, fgt, cfg):
+    print(f"Connecting to {fgt['ip']} with {cfg['fgt_user']} and trying to set the new password to {cfg['fgt_password']}")
+    client.connect(
+        fgt['ip'],
+        port = fgt.get('port', 22),
+        username = cfg['fgt_user'],
+        password = ""
+    )            
+    interact = SSHClientInteraction(client, display=True)
+    print('>')
+    interact.expect('New Password: ')
+    interact.send(cfg['fgt_password'])
+    interact.expect('Confirm Password: ')
+    interact.send(cfg['fgt_password'])
+    interact.expect('.*')    
+    print('<')       
+    print("The new password has been set successfully!")  
 
 ###################
 # Deployment Tasks
@@ -65,7 +82,7 @@ def importCLITemplateTask(session, task):
     for t in glob.glob(task['src']):
         with open(t, 'r') as f:
             session.addCLITemplate(
-                template_name = os.path.basename(os.path.splitext(t)[0]),
+                template_name = task.get('rename', os.path.basename(os.path.splitext(t)[0])),
                 content = f.read(),
                 type = task.get('syntax', 'jinja'),
                 prerun = task.get('prerun', False)
@@ -232,22 +249,4 @@ def __applyCLIConfig(client, fgt, cfg, cli_config):
     )    
     stdin, stdout, stderr = client.exec_command(cli_config)
     return stdout.readlines()    
-    
-
-def setNewPassword(client, fgt, cfg):
-    print(f"Connecting to {fgt['ip']} with {cfg['fgt_user']} and trying to set the new password to {cfg['fgt_password']}")
-    client.connect(
-        fgt['ip'],
-        port = fgt.get('port', 22),
-        username = cfg['fgt_user'],
-        password = ""
-    )            
-    interact = SSHClientInteraction(client, display=True)
-    print('>')
-    interact.expect('New Password: ')
-    interact.send(cfg['fgt_password'])
-    interact.expect('Confirm Password: ')
-    interact.send(cfg['fgt_password'])
-    interact.expect('.*')    
-    print('<')       
-    print("The new password has been set successfully!")    
+      
