@@ -36,8 +36,9 @@ def main():
         print()
         print(f"TASK {i}: {task['name']}")
         print("---------------------------------------------------")
-        if (args.skip_tags and task.get('tag', '') in args.skip_tags) or \
-           (args.tags and task.get('tag', '') not in args.tags):
+
+        if (args.tags and task.get('tag', '') not in args.tags) or \
+           (args.skip_tags and not args.tags and task.get('tag', '') in args.skip_tags):
             print("\033[35mSKIPPED by tag\033[0m")
             continue
 

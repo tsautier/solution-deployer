@@ -19,7 +19,7 @@ echo
 echo ---------------------------------------
 echo Starting the Fancy Solution Deployer...
 echo ---------------------------------------
-ORCH_TENANT=CustomerU ./autodeploy.py --tags foundation
+ORCH_TENANT=CustomerU ./autodeploy.py --tags foundation,lab
 
 end=`date +%s`
 min=$((($end-$start)/60))
