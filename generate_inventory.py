@@ -46,30 +46,6 @@ def printInventory(cfg, in_file):
 
 def main():
 
-    tenantdir = "tenants/CustomerA"
-    with open(tenantdir + '/config.yaml', 'r') as cfgfile:
-        cfg = safe_load(cfgfile)
-        print()
-        print("inventory.CustomerA.csv")
-        print("=======================")            
-        printInventory(cfg, tenantdir + '/inventory.CustomerA.j2')
-
-    tenantdir = "tenants/CustomerB"
-    with open(tenantdir + '/config.yaml', 'r') as cfgfile:
-        cfg = safe_load(cfgfile)
-        print()
-        print("inventory.CustomerB.csv")
-        print("=======================")            
-        printInventory(cfg, tenantdir + '/inventory.CustomerB.j2')
-
-    tenantdir = "tenants/CustomerC"
-    with open(tenantdir + '/config.yaml', 'r') as cfgfile:
-        cfg = safe_load(cfgfile)
-        print()
-        print("inventory.CustomerC.csv")
-        print("=======================")            
-        printInventory(cfg, tenantdir + '/inventory.CustomerC.j2')       
-
     tenantdir = "tenants/CustomerU"
     with open(tenantdir + '/config.yaml', 'r') as cfgfile:
         cfg = safe_load(cfgfile)
