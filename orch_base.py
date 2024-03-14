@@ -129,28 +129,20 @@ def onboardDevicesTask(cfg, task):
         print(f"Factory-resetting device {task['site']}...")
         print("NOTE: We won't wait until it finishes ZTP process, so check it afterwards!")
         dev_list = [ task['site'] ]
+    else:
+        print("Factory-resetting all tenant devices...")
+        print("NOTE: We won't wait until it finishes ZTP process, so check it afterwards!")
+        dev_list = cfg['sites'].keys()
         
     fail = 0
     for d in dev_list:
         print(f"--> {d}")
-        fgt = cfg['sites'][d]
-        client = SSHClient()
-        client.set_missing_host_key_policy(AutoAddPolicy())
-        try:
-            __factoryResetDevice(client, fgt, cfg)
-        except ssh_exception.AuthenticationException as e:
-            print(f"\033[91m\033[1mAuthentication failed,\033[0m trying an empty password (in case it is not set yet)...") 
-            try:
-                setNewPassword(client, fgt, cfg)
-                __factoryResetDevice(client, fgt, cfg)
-            except ssh_exception.AuthenticationException as e:
-                fail += 1
-                print(f"\033[91m\033[1mFAILED:\033[0m {e}") 
-        except Exception as e:
-            fail += 1
-            print(f"\033[91m\033[1mFAILED:\033[0m {e}") 
-        finally:
-            client.close()
+        if not __runOnDevice(
+            fgt = cfg['sites'][d],
+            action = __factoryResetDevice,
+            cfg = cfg
+        ): fail+=1
+
     if fail:
         raise Exception("At least some of the devices failed to onboard!")
 
@@ -221,7 +213,7 @@ def __runOnDevice(fgt, action, cfg, action_args=None):
 
     return output
 
-def __factoryResetDevice(client, fgt, cfg):
+def __factoryResetDevice(client, fgt, cfg, args=None):
     print(f"Connecting to {fgt['ip']} with {cfg['fgt_user']} / {cfg['fgt_password']}")
     client.connect(
         fgt['ip'],
@@ -237,6 +229,7 @@ def __factoryResetDevice(client, fgt, cfg):
     interact.send('y')
     interact.expect('.*')       
     print('<')
+    return True
 
 def __applyCLIConfig(client, fgt, cfg, cli_config):
     print(f"Connecting to {fgt['ip']} with {cfg['fgt_user']} / {cfg['fgt_password']}")
