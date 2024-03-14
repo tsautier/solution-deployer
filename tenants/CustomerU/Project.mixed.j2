@@ -94,6 +94,32 @@
           'ip': lan2_ip
         }
       ]
+    },
+
+    'LegacySpoke': {
+      'options': {
+        'advpn2': false,
+        'dynamic_bgp': false
+      },
+      'interfaces': [
+        {
+          'name': isp1_intf,
+          'role': 'wan',
+          'ol_type': 'ISP1',
+          'ip': 'dhcp'
+        },
+        {
+          'name': mpls_intf,
+          'role': 'wan',
+          'ol_type': 'MPLS',
+          'ip': 'dhcp'
+        },
+        {
+          'name': lan_intf,
+          'role': 'lan',
+          'ip': lan_ip
+        }
+      ]
     }
 
   }
