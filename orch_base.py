@@ -41,7 +41,7 @@ def getNewmanCommand(cfg, session, vars={}):
     command.append('--env-var "password=' + cfg['fmg_password'] + '"')
     command.append('--env-var "adom=' + cfg['fmg_adom'] + '"')
     command.append('--env-var "session=' + session.getSessionCookie() + '"')
-    for k,v in vars.items(): command.append('--env-var "' + k + '=' + v + '"')
+    for k,v in vars.items(): command.append('--env-var "' + k + '=' + str(v) + '"')
     return command
 
 def setNewPassword(client, fgt, cfg):
