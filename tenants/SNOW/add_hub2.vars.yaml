@@ -1,0 +1,9 @@
+---
+is_hub: yes
+profile: Hub
+model: VM
+hostname: Hub2
+isp1_intf: port1
+isp2_intf: port2
+mpls_intf: port4
+loopback: 10.200.1.254

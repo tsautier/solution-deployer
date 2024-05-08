@@ -1,0 +1,11 @@
+---
+profile: RegionalDC
+model: 1800F
+hostname: site_dc
+isp1_intf: port1
+mpls_intf: port4
+lan_intf: port5
+vlan10_ip: 10.0.10.1/24
+vlan20_ip: 10.0.20.1/24
+vlan30_ip: 10.0.30.1/24
+loopback: 10.200.10.1

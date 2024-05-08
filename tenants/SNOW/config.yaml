@@ -1,0 +1,41 @@
+---
+fmg_host: 34.154.21.246:14006
+fmg_user: admin
+fmg_password: fortinet
+fmg_adom: SNOW
+
+postman_collection: tenants/SNOW/api.collection.json
+default_tags: none
+
+tasks:
+  - name: Add Customer
+    type: postman
+    folder: Add Customer
+    vars: tenants/SNOW/add_customer.vars.yaml
+    tag: add_customer
+  - name: Add Hub1
+    type: postman
+    folder: Add Site
+    vars: tenants/SNOW/add_hub1.vars.yaml
+    tag: add_hubs
+  - name: Add Hub2
+    type: postman
+    folder: Add Site
+    vars: tenants/SNOW/add_hub2.vars.yaml
+    tag: add_hubs     
+  - name: Add Small Branch
+    type: postman
+    folder: Add Site
+    vars: tenants/SNOW/add_small_branch.vars.yaml
+    tag: add_small_branch
+  - name: Add Large Branch
+    type: postman
+    folder: Add Site
+    vars: tenants/SNOW/add_large_branch.vars.yaml
+    tag: add_large_branch
+  - name: Add Regional DC
+    type: postman
+    folder: Add Site
+    vars: tenants/SNOW/add_regional_dc.vars.yaml
+    tag: add_regional_dc
+

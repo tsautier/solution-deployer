@@ -1,0 +1,217 @@
+{#                            Project Template                                #}
+{# -------------------------------------------------------------------------- #}
+{# This file describes the project: its Regions, Hubs and Device Profiles     #}
+{# Normally, this is the only file that needs to be edited between            #}
+{# different projects                                                         #}
+{# -------------------------------------------------------------------------- #}
+{# Design flavor: "Dynamic BGP on Loopback"                                   #}
+{# Please contact your Fortinet representatives for more details              #}
+
+{#
+  Per-device variables used:
+  - Required:
+    - hostname
+    - loopback
+    - profile
+    - region
+    - hub1_isp1
+    - hub1_isp2
+    - hub1_mpls
+    - hub2_isp1
+    - hub2_isp2
+    - hub2_mpls
+  - Depending on topology:
+    - isp1_intf
+    - isp2_intf
+    - mpls_intf
+    - lan_intf
+    - lan_ip
+    - vlan10_ip
+    - vlan20_ip
+    - vlan30_ip
+#}
+
+{# Optional settings #}
+{% set cert_auth = false %}
+
+{# Optional defaults (can be overriden by profiles) #}
+{% set advpn2 = true %}
+{% set dynamic_bgp = true %}
+
+{#  Mandatory Global Definitions #}
+{% set lo_summary = '10.200.0.0/14' %}
+
+{# Regions #}
+{% set regions = {
+    'SuperWAN': {
+      'as': '65001',
+      'hubs': [ 'Hub1', 'Hub2' ]
+    }
+  }
+%}
+
+{# Device Profiles #}
+{% set profiles = {
+
+    'SmallBranch': {
+      'interfaces': [
+        {
+          'name': isp1_intf,
+          'role': 'wan',
+          'ol_type': 'ISP1',
+          'ip': 'dhcp',
+          'dia': true
+        },
+        {
+          'name': lan_intf,
+          'role': 'lan',
+          'ip': lan_ip
+        }
+      ]
+    },
+
+    'LargeBranch': {
+      'interfaces': [
+        {
+          'name': isp1_intf,
+          'role': 'wan',
+          'ol_type': 'ISP1',
+          'backup_group': 1,
+          'ip': 'dhcp',
+          'dia': true
+        },
+        {
+          'name': isp2_intf,
+          'role': 'wan',
+          'ol_type': 'ISP2',
+          'backup_group': 1,
+          'ip': 'dhcp',
+          'dia': true
+        },        
+        {
+          'name': 'FEX_LTE',
+          'role': 'wan',
+          'ol_type': 'ISP1',
+          'ul_name': 'LTE',
+          'backup_group': 1,
+          'backup': true,
+          'fex': true,
+          'parent': lte_intf,
+          'ip': 'dhcp',
+          'dia': true
+        },        
+        {
+          'name': lan_intf,
+          'role': 'lan',
+          'ip': lan_ip
+        }
+      ]
+    },
+
+    'RegionalDC': {
+      'interfaces': [
+        {
+          'name': isp1_intf,
+          'role': 'wan',
+          'ol_type': 'ISP1',
+          'ip': 'dhcp',
+          'dia': true
+        },
+        {
+          'name': mpls_intf,
+          'role': 'wan',
+          'ol_type': 'MPLS',
+          'ip': 'dhcp'
+        },
+        {
+          'name': 'vl_10',
+          'role': 'lan',
+          'vlanid': 10,
+          'parent': lan_intf,
+          'ip': vlan10_ip
+        },
+        {
+          'name': 'vl_20',
+          'role': 'lan',
+          'vlanid': 20,
+          'parent': lan_intf,
+          'ip': vlan20_ip
+        },
+        {
+          'name': 'vl_30',
+          'role': 'lan',
+          'vlanid': 30,
+          'parent': lan_intf,
+          'ip': vlan30_ip
+        }
+      ]
+    },
+
+    'Hub': {
+      'interfaces': [
+        {
+          'name': isp1_intf,
+          'role': 'wan',
+          'ol_type': 'ISP1',
+          'ip': 'dhcp',
+          'dia': true
+        },
+        {
+          'name': isp2_intf,
+          'role': 'wan',
+          'ol_type': 'ISP2',
+          'ip': 'dhcp',
+          'dia': true
+        },        
+        {
+          'name': mpls_intf,
+          'role': 'wan',
+          'ol_type': 'MPLS',
+          'ip': 'dhcp'
+        }
+      ]
+    }        
+
+  }
+%}
+
+{# Hubs #}
+{% set hubs = {
+
+    'Hub1': {
+      'lo_bgp': '10.200.1.253',
+      'overlays': {
+        'ISP1': {
+          'wan_ip': hub1_isp1,
+          'network_id': '11'
+        },
+        'ISP2': {
+          'wan_ip': hub1_isp2,
+          'network_id': '12'
+        },
+        'MPLS': {
+          'wan_ip': hub1_mpls,
+          'network_id': '13'
+        }
+      }
+    },
+
+    'Hub2': {
+      'lo_bgp': '10.200.1.254',    
+      'overlays': {
+        'ISP1': {
+          'wan_ip': hub2_isp1,
+          'network_id': '21'
+        },
+        'ISP2': {
+          'wan_ip': hub2_isp2,
+          'network_id': '22'
+        },
+        'MPLS': {
+          'wan_ip': hub2_mpls,
+          'network_id': '23'
+        }
+      }
+    }
+  }
+%}
