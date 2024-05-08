@@ -31,19 +31,6 @@ def getApiSession(cfg):
     )
     return session
 
-def getNewmanCommand(cfg, session, vars={}):
-    command = []
-    command.append('newman run')
-    command.append('"' + cfg['postman_collection'] + '"')
-    command.append('--insecure')
-    command.append('--env-var "ip=' + cfg['fmg_host'] + '"')
-    command.append('--env-var "username=' + cfg['fmg_user'] + '"')
-    command.append('--env-var "password=' + cfg['fmg_password'] + '"')
-    command.append('--env-var "adom=' + cfg['fmg_adom'] + '"')
-    command.append('--env-var "session=' + session.getSessionCookie() + '"')
-    for k,v in vars.items(): command.append('--env-var "' + k + '=' + str(v) + '"')
-    return command
-
 def setNewPassword(client, fgt, cfg):
     print(f"Connecting to {fgt['ip']} with {cfg['fgt_user']} and trying to set the new password to {cfg['fgt_password']}")
     client.connect(
@@ -72,7 +59,7 @@ def runPostmanTask(cfg, session, task):
     if 'vars' in task:
         with open(task['vars'], 'r') as varfile:
             vars = safe_load(varfile)
-    command = getNewmanCommand(cfg, session, vars)
+    command = __getNewmanCommand(cfg, session, vars)
     command.append(f"--folder \"{task['folder']}\"")
     if os.system(' '.join(command)): 
         raise Exception("Postman run ended with error(s)!")
@@ -242,4 +229,16 @@ def __applyCLIConfig(client, fgt, cfg, cli_config):
     )    
     stdin, stdout, stderr = client.exec_command(cli_config)
     return stdout.readlines()    
-      
+
+def __getNewmanCommand(cfg, session, vars={}):
+    command = []
+    command.append('newman run')
+    command.append('"' + cfg['postman_collection'] + '"')
+    command.append('--insecure')
+    command.append('--env-var "ip=' + cfg['fmg_host'] + '"')
+    command.append('--env-var "username=' + cfg['fmg_user'] + '"')
+    command.append('--env-var "password=' + cfg['fmg_password'] + '"')
+    command.append('--env-var "adom=' + cfg['fmg_adom'] + '"')
+    command.append('--env-var "session=' + session.getSessionCookie() + '"')
+    for k,v in vars.items(): command.append('--env-var "' + k + '=' + str(v) + '"')
+    return command      
