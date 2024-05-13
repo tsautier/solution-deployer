@@ -1,10 +1,10 @@
+#!/usr/bin/env python3
+
 # generate_inventory.py                                                      #
 # Solution Deployer, Version 7.4.x b100                                      #
 # -------------------------------------------------------------------------- #
 # Maintainers: CSE Telco/MSSP EMEA, Fortinet (internal use only)             #
 # -------------------------------------------------------------------------- #
-
-#!/usr/bin/env python3
 
 import csv, io
 from yaml import safe_load

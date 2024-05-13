@@ -1,10 +1,10 @@
+#!/usr/bin/env python3
+
 # onboard_devices.py                                                         #
 # Solution Deployer, Version 7.4.x b100                                      #
 # -------------------------------------------------------------------------- #
 # Maintainers: CSE Telco/MSSP EMEA, Fortinet (internal use only)             #
 # -------------------------------------------------------------------------- #
-
-#!/usr/bin/env python3
 
 import sys
 from orch_base import *
