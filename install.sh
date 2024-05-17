@@ -1,17 +1,18 @@
 #!/bin/bash
 
 if [ $# -ne 1 ]; then echo Please specify the target directory.; exit 1; fi
-dir="$1"
+dst_dir="$1"
+src_dir=`dirname $0`
 
 echo ----------------------------------------------------------
 echo Copying the Solution Deployer into the target directory...
 echo ----------------------------------------------------------
 
-mkdir -p $dir
-cp *.py $dir
-cp *.sh $dir 
+mkdir -p $dst_dir
+cp $src_dir/*.py $dst_dir
+cp $src_dir/*.sh $dst_dir
 
-mkdir -p $dir/fmg_api
-cp fmg_api/*.py $dir/fmg_api
+mkdir -p $dst_dir/fmg_api
+cp $src_dir/fmg_api/*.py $dst_dir/fmg_api
 
-mkdir -p $dir/tenants
+mkdir -p $dst_dir/tenants
