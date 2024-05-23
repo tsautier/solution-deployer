@@ -3,11 +3,11 @@
 start=`date +%s`
 
 echo ------------------------------------------------------------------------
-echo Downloading the latest version of the Jinja Templates for devel/7.4...
+echo Downloading the latest version of the Jinja Templates for release/7.4...
 echo ------------------------------------------------------------------------
 mkdir -p tenants/shared
-wget -O tenants/shared/7.4.zip https://github.com/fortinet-solutions-cse/sdwan-advpn-reference/archive/refs/heads/devel/7.4.zip
-unzip -o tenants/shared/7.4.zip 'sdwan-advpn-reference-devel-7.4/dynamic-bgp-on-lo/*.j2' -d tenants/shared/
+wget -O tenants/shared/7.4.zip https://github.com/fortinet-solutions-cse/sdwan-advpn-reference/archive/refs/heads/release/7.4.zip
+unzip -o tenants/shared/7.4.zip 'sdwan-advpn-reference-release-7.4/dynamic-bgp-on-lo/*.j2' -d tenants/shared/
 
 echo
 echo -----------------------------------------------------------------------------
