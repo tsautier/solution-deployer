@@ -7,6 +7,7 @@
 # -------------------------------------------------------------------------- #
 
 import os, glob, csv, jinja2
+from pathlib import Path
 from paramiko import SSHClient, AutoAddPolicy, ssh_exception
 from paramiko_expect import SSHClientInteraction
 from yaml import safe_load
@@ -14,10 +15,13 @@ from fmg_api.api_base import ApiSession
 
 def readConfig():
 
+    tenant = os.environ.get("ORCH_TENANT") or \
+        Path('.orch_tenant').read_text().strip() if Path('.orch_tenant').exists() else ""
+
     print("========================")
-    print(" Tenant: " + os.environ.get("ORCH_TENANT"))
+    print(" Tenant: " + tenant)
     print("========================")
-    tenantdir = "tenants/" + os.environ.get("ORCH_TENANT")
+    tenantdir = "tenants/" + tenant
 
     with open(tenantdir + '/config.yaml', 'r') as cfgfile:
         cfg = safe_load(cfgfile)
