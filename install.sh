@@ -10,7 +10,6 @@ echo ----------------------------------------------------------
 
 mkdir -p $dst_dir
 cp $src_dir/*.py $dst_dir
-cp $src_dir/*.sh $dst_dir
 
 mkdir -p $dst_dir/fmg_api
 cp $src_dir/fmg_api/*.py $dst_dir/fmg_api
