@@ -17,7 +17,7 @@ def main():
     for d in [ 'site1-1', 'site1-2', 'site1-H1', 'site1-H2', 'site2-1', 'site2-H1' ]:
         task = {
             'site': d,
-            'src': 'tenants/shared/delete_static.j2'
+            'src': 'tenants/shared/all_fgt.j2'
         }
         applyCLIConfigTask(cfg, task)
 
