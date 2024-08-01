@@ -63,3 +63,143 @@ After specifying the tenant, you can simply run the Deployer, and the rest will 
 
 By default, the Deployer will execute all the tenant tasks from the `config.yaml`. 
 You can use the flags `--tags` and `--skip-tags` to specify the list of tags to be executed / skipped. 
+
+## Config.yaml
+
+Here is an example demonstrating the general syntax of the `config.yaml` with added comments:
+
+```yaml
+---
+# FMG details to be used by the Deployer for API calls
+fmg_host: 192.168.0.15
+fmg_user: admin
+fmg_password: fortinet
+fmg_adom: CustomerU
+
+# Postman collection to be used for the tasks with type = postman
+postman_collection: tenants/shared/Managed_SDWAN_7_4_x.postman.json
+# List of tags to skip when running the Deployer without explicit --tags / --skip-tags flags
+default_skip_tags: lab
+
+# FGT details, including the FMG IP from FGT perspective
+fgfm_ip: 192.168.0.15
+fgt_user: admin
+fgt_password: fortinet
+
+# List of FGTs
+sites:
+  site1-1:
+    ip: 192.168.0.31
+  site1-2:
+    ip: 192.168.0.32
+  #...
+
+# List of tasks
+tasks:
+  - name: Create Foundation
+    type: postman
+    folder: Foundation
+    tag: foundation
+  - name: Import Project Template (dyn_bgp only)
+    type: cli_templates
+    src: tenants/CustomerU/Project.dyn_bgp.j2
+    rename: Project
+    tag: lab
+  # ...
+```
+
+See some of the provided tenant configs for more examples. 
+
+## Tasks
+
+Each task has the following parameters:
+
+- `name` - the name of the tasks (for display purposes mainly)
+- `type` - one of the supported types (see below)
+- `tag` - a tag to include/exclude tasks from the run (optional)
+- Additional arguments (zero or more), as defined by the task type
+
+Let's list all the supported task types and describe the arguments for each one of them.
+
+### `type: postman`
+
+Run one or more API calls from the Postman collection defined under the global `postman_collection` parameter.
+
+Supported arguments:
+
+| Argument | Values   | Description                                   | Required | Default |
+|----------|----------|-----------------------------------------------|----------|---------|
+| `folder` | string   | API call or folder name to run (using Newman) | yes      | -       |
+| `vars`   | filename | YAML file with variables (to pass to Newman)  | no       | -       |
+
+In addition to the arbitrary variables optionally specified by the `vars` argument, the following variables are always passed to Newman
+(this is currently hard-coded):
+
+| Variable   | Description                                              |
+|------------|----------------------------------------------------------|
+| `ip`       | FMG IP from the `fmg_host` parameter                     |
+| `adom`     | FMG ADOM from the `fmg_adom` parameter                   |
+| `session`  | Session token (FMG login call will be run automatically) |
+
+Therefore, it is important that your Postman collection uses these variables in the calls.
+For example, the JSON API endpoint must be: 
+
+```
+https://{{ip}}/jsonrpc
+```
+
+### `type: cli_templates`
+
+Import CLI Template files into the FMG. 
+
+Supported arguments:
+
+| Argument | Values           | Description                                | Required | Default                               |
+|----------|------------------|--------------------------------------------|----------|---------------------------------------|
+| `src`    | filename(s)      | Template files (shell wildcards supported) | yes      | -                                     |
+| `rename` | string           | Target name of the Template on FMG         | no       | Original filename (without extension) |
+| `syntax` | 'jinja' or 'cli' | CLI Template type                          | no       | 'jinja'                               |
+| `prerun` | boolean          | Pre-run CLI Template                       | no       | false                                 |
+
+
+### `type: model_devices`
+
+Create Model Devices on the FMG, using an inventory CSV file. The CSV file format is the same as supported by the FMG for the 
+bulk Model Device creation. 
+
+The task will:
+
+- Create the Model Devices
+- Set per-device Variables
+- Assign the Pre-run CLI Template
+
+Supported arguments:
+
+| Argument | Values      | Description                    | Required | Default                      |
+|----------|-------------|--------------------------------|----------|------------------------------|
+| `src`    | filename(s) | Inventory CSV file             | yes      | -                            |
+| `prerun` | boolean     | Pre-run CLI Template to assign | no       | 'provision_interfaces_on_vm' |
+
+
+### `type: onboard`
+
+Trigger ZTP by factory-resetting the devices from the inventory CSV file. 
+
+Currently, we only support ZTP for the VMs, by running the following CLI command:
+
+```
+execute factoryreset2 keepvmlicense
+```
+
+Supported arguments:
+
+| Argument | Values      | Description                | Required | Default |
+|----------|-------------|----------------------------|----------|---------|
+| `src`    | filename(s) | Inventory CSV file         | no       | -       |
+| `site`   | string      | Device name to trigger ZTP | no       | -       |
+
+The task logic is as follows:
+
+- If an inventory file is specified (`src` argument), we will factory-reset all the devices in that file
+- Else if a specific device is specified (`site` argument), we will factory-reset only that device
+- Else if none of the arguments is specified, we will factory-reset all the tenant devices defined in the `config.yaml`
