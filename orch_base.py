@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # orch_base.py                                                               #
-# Solution Deployer, Version 7.4.x b100                                      #
+# Solution Deployer, Version 7.4.x b100.1                                    #
 # -------------------------------------------------------------------------- #
 # Maintainers: CSE Telco/MSSP EMEA, Fortinet (internal use only)             #
 # -------------------------------------------------------------------------- #
@@ -16,7 +16,7 @@ from fmg_api.api_base import ApiSession
 def readConfig():
 
     tenant = os.environ.get("ORCH_TENANT") or \
-        Path('.orch_tenant').read_text().strip() if Path('.orch_tenant').exists() else ""
+        (Path('.orch_tenant').read_text().strip() if Path('.orch_tenant').exists() else "")
 
     print("========================")
     print(" Tenant: " + tenant)
@@ -222,7 +222,7 @@ def __factoryResetDevice(client, fgt, cfg, args=None):
     print('>')
     interact.expect('.*# ')
     interact.send('execute factoryreset2 keepvmlicense')
-    interact.expect('.*\(y/n\)')
+    interact.expect(r'.*\(y/n\)')
     interact.send('y')
     interact.expect('.*')       
     print('<')
