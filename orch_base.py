@@ -125,7 +125,8 @@ def createModelDevicesTask(session, task, silent=False):
     )    
     session.addModelDevices(dev_list)
     session.setVariables(vars)
-    session.assignCLITemplate(task.get('prerun', 'provision_interfaces_on_vm'), dev_list)                
+    if 'prerun' in task:
+        session.assignCLITemplate(task['prerun'], dev_list)        
 
 def onboardDevicesTask(cfg, task, silent=False):
     if 'src' in task:
