@@ -34,8 +34,8 @@ def readConfig(silent=False):
 
     return cfg
 
-def getApiSession(cfg):
-    print("Connecting to FMG...")
+def getApiSession(cfg, silent=False):
+    silent or print("Connecting to FMG...")
     session = ApiSession(
         url = 'https://' + cfg['fmg_host'] + '/jsonrpc',
         adom = cfg['fmg_adom'],
@@ -44,8 +44,8 @@ def getApiSession(cfg):
     )
     return session
 
-def setNewPassword(client, fgt, cfg):
-    print(f"Connecting to {fgt['ip']} with {cfg['fgt_user']} and trying to set the new password to {cfg['fgt_password']}")
+def setNewPassword(client, fgt, cfg, silent=False):
+    silent or print(f"Connecting to {fgt['ip']} with {cfg['fgt_user']} and trying to set the new password to {cfg['fgt_password']}")
     client.connect(
         fgt['ip'],
         port = fgt.get('port', 22),
@@ -53,14 +53,14 @@ def setNewPassword(client, fgt, cfg):
         password = ""
     )            
     interact = SSHClientInteraction(client, display=True)
-    print('>')
+    silent or print('>')
     interact.expect('New Password: ')
     interact.send(cfg['fgt_password'])
     interact.expect('Confirm Password: ')
     interact.send(cfg['fgt_password'])
     interact.expect('.*')    
-    print('<')       
-    print("The new password has been set successfully!")  
+    silent or print('<')       
+    silent or print("The new password has been set successfully!")  
 
 def getSystemStatus(output):
     dict = {}
@@ -74,8 +74,8 @@ def getSystemStatus(output):
 # Deployment Tasks
 ###################
 
-def runPostmanTask(cfg, session, task):
-    print(f"Running Postman collection - {task['folder']}...")
+def runPostmanTask(cfg, session, task, silent=False):
+    silent or print(f"Running Postman collection - {task['folder']}...")
     vars = {}
     if 'vars' in task:
         with open(task['vars'], 'r') as varfile:
@@ -85,8 +85,8 @@ def runPostmanTask(cfg, session, task):
     if os.system(' '.join(command)): 
         raise Exception("Postman run ended with error(s)!")
 
-def importCLITemplateTask(session, task):
-    print(f"Importing CLI Templates from {task['src']}...")
+def importCLITemplateTask(session, task, silent=False):
+    silent or print(f"Importing CLI Templates from {task['src']}...")
     for t in glob.glob(task['src']):
         with open(t, 'r') as f:
             session.addCLITemplate(
@@ -96,15 +96,15 @@ def importCLITemplateTask(session, task):
                 prerun = task.get('prerun', False)
             )
 
-def deleteDevicesTask(session, task):
-    print(f"Deleting Devices from {task['adom']}...")
+def deleteDevicesTask(session, task, silent=False):
+    silent or print(f"Deleting Devices from {task['adom']}...")
     session.deleteDevices(
         session.getDevices(adom=task['adom']),
         adom=task['adom']
     )
 
-def createModelDevicesTask(session, task):
-    print(f"Creating Model Devices from {task['src']}...")
+def createModelDevicesTask(session, task, silent=False):
+    silent or print(f"Creating Model Devices from {task['src']}...")
     dev_list, vars = [], {}
     with open(task['src'], 'r', encoding='utf-8-sig') as f:
         for d in csv.DictReader(f):
@@ -117,8 +117,8 @@ def createModelDevicesTask(session, task):
             for k, v in d.items():
                 vars.setdefault(k, {})
                 vars[k][dev_name] = v
-    print(f"Devices: {[dev['name'] for dev in dev_list]}")
-    print(f"Variables: {[var for var in vars.keys()]}")
+    silent or print(f"Devices: {[dev['name'] for dev in dev_list]}")
+    silent or print(f"Variables: {[var for var in vars.keys()]}")
     session.deleteDevices(
         session.getDevices('root'),
         adom='root'
@@ -127,71 +127,74 @@ def createModelDevicesTask(session, task):
     session.setVariables(vars)
     session.assignCLITemplate(task.get('prerun', 'provision_interfaces_on_vm'), dev_list)                
 
-def onboardDevicesTask(cfg, task):
+def onboardDevicesTask(cfg, task, silent=False):
     if 'src' in task:
-        print(f"Factory-resetting devices from {task['src']}...")
-        print("NOTE: We won't wait until they finish ZTP process, so check it afterwards!")
+        silent or print(f"Factory-resetting devices from {task['src']}...")
+        silent or print("NOTE: We won't wait until they finish ZTP process, so check it afterwards!")
         with open(task['src'], 'r', encoding='utf-8-sig') as f:
             dev_list = [ d['name'] for d in csv.DictReader(f) ]
     elif 'site' in task:
-        print(f"Factory-resetting device {task['site']}...")
-        print("NOTE: We won't wait until it finishes ZTP process, so check it afterwards!")
+        silent or print(f"Factory-resetting device {task['site']}...")
+        silent or print("NOTE: We won't wait until it finishes ZTP process, so check it afterwards!")
         dev_list = [ task['site'] ]
     else:
-        print("Factory-resetting all tenant devices...")
-        print("NOTE: We won't wait until it finishes ZTP process, so check it afterwards!")
+        silent or print("Factory-resetting all tenant devices...")
+        silent or print("NOTE: We won't wait until it finishes ZTP process, so check it afterwards!")
         dev_list = cfg['sites'].keys()
         
     fail = 0
     for d in dev_list:
-        print(f"--> {d}")
+        silent or print(f"--> {d}")
         if not __runOnDevice(
             fgt = cfg['sites'][d],
             action = __factoryResetDevice,
-            cfg = cfg
+            cfg = cfg,
+            silent = silent
         ): fail+=1
 
     if fail:
         raise Exception("At least some of the devices failed to onboard!")
 
-def runCLICommandTask(cfg, task):
-    print(f"Running CLI on {task['site']}...")
-    print(f"CLI: {task['cli']}")
+def runCLICommandTask(cfg, task, silent=False):
+    silent or print(f"Running CLI on {task['site']}...")
+    silent or print(f"CLI: {task['cli']}")
     output = __runOnDevice(
         fgt = cfg['sites'][task['site']],
         action = __applyCLIConfig,
         cfg = cfg,
-        action_args = task['cli']
+        action_args = task['cli'],
+        silent = silent
     )
     if not output:
         raise Exception("Failed to run CLI!")
     return output
 
-def applyCLIConfigTask(cfg, task):
+def applyCLIConfigTask(cfg, task, silent=False):
     todo = {}
     if 'site' in task and len(glob.glob(task['src'])) == 1:
-        print(f"Running CLI from {task['src']} on {task['site']}...")
+        silent or print(f"Running CLI from {task['src']} on {task['site']}...")
         todo[task['site']] = task['src']
     elif 'src' in task:
-        print(f"Running CLI from {task['src']} on respective devices...")
+        silent or print(f"Running CLI from {task['src']} on respective devices...")
         for c in glob.glob(task['src']):
             d = os.path.basename(os.path.splitext(c)[0])
             todo[d] = c
 
     fail = 0
     for d,c in todo.items():
-        print(f"--> {d}")
+        silent or print(f"--> {d}")
         env = jinja2.Environment(
             loader=jinja2.FileSystemLoader(os.path.dirname(c)),
             undefined=jinja2.StrictUndefined
         )
         rendered = env.get_template(os.path.basename(c)).render(task.get('vars', {}))
-        print(rendered)
+        silent or print(rendered)
         if not __runOnDevice(
             fgt = cfg['sites'][d],
             action = __applyCLIConfig,
             cfg = cfg,
-            action_args = rendered
+            action_args = rendered,
+            silent = silent
         ): fail+=1
     
     if fail:
@@ -201,19 +204,19 @@ def applyCLIConfigTask(cfg, task):
 # Helper Functions
 ###################
 
-def __runOnDevice(fgt, action, cfg, action_args=None):
+def __runOnDevice(fgt, action, cfg, action_args=None, silent=False):
     output = None
     client = SSHClient()
     client.set_missing_host_key_policy(AutoAddPolicy())
     try:
-        output = action(client, fgt, cfg, action_args)
+        output = action(client, fgt, cfg, action_args, silent)
     except ssh_exception.AuthenticationException as e:
-        print(f"\033[91m\033[1mAuthentication failed,\033[0m trying an empty password (in case it is not set yet)...") 
+        silent or print(f"\033[91m\033[1mAuthentication failed,\033[0m trying an empty password (in case it is not set yet)...") 
         try:
-            setNewPassword(client, fgt, cfg)
-            output = action(client, fgt, cfg, action_args)
+            setNewPassword(client, fgt, cfg, silent)
+            output = action(client, fgt, cfg, action_args, silent)
         except ssh_exception.AuthenticationException as e:
-            print(f"\033[91m\033[1mFAILED:\033[0m {e}") 
+            silent or print(f"\033[91m\033[1mFAILED:\033[0m {e}") 
     except Exception as e:
         print(f"\033[91m\033[1mFAILED:\033[0m {e}") 
     finally:
@@ -221,8 +224,8 @@ def __runOnDevice(fgt, action, cfg, action_args=None):
 
     return output
 
-def __factoryResetDevice(client, fgt, cfg, args=None):
-    print(f"Connecting to {fgt['ip']} with {cfg['fgt_user']} / {cfg['fgt_password']}")
+def __factoryResetDevice(client, fgt, cfg, args=None, silent=False):
+    silent or print(f"Connecting to {fgt['ip']} with {cfg['fgt_user']} / {cfg['fgt_password']}")
     client.connect(
         fgt['ip'],
         port = fgt.get('port', 22),
@@ -230,17 +233,17 @@ def __factoryResetDevice(client, fgt, cfg, args=None):
         password = cfg['fgt_password']
     )
     interact = SSHClientInteraction(client, display=True)
-    print('>')
+    silent or print('>')
     interact.expect('.*# ')
     interact.send('execute factoryreset2 keepvmlicense')
     interact.expect(r'.*\(y/n\)')
     interact.send('y')
     interact.expect('.*')       
-    print('<')
+    silent or print('<')
     return True
 
-def __applyCLIConfig(client, fgt, cfg, cli_config):
-    print(f"Connecting to {fgt['ip']} with {cfg['fgt_user']} / {cfg['fgt_password']}")
+def __applyCLIConfig(client, fgt, cfg, cli_config, silent=False):
+    silent or print(f"Connecting to {fgt['ip']} with {cfg['fgt_user']} / {cfg['fgt_password']}")
     client.connect(
         fgt['ip'],
         port = fgt.get('port', 22),
