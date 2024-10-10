@@ -1,21 +1,13 @@
 #!/usr/bin/env python3
 
 # check_devices.py                                                           #
-# Solution Deployer, Version 7.4.x b100                                      #
+# Solution Deployer, Version 7.4.x b110                                      #
 # -------------------------------------------------------------------------- #
 # Maintainers: CSE Telco/MSSP EMEA, Fortinet (internal use only)             #
 # -------------------------------------------------------------------------- #
 
-from orch_base import runCLICommandTask
+from orch_base import runCLICommandTask, getSystemStatus
 from yaml import safe_load
-
-def getSystemStatus(output):
-    dict = {}
-    for str in [ s for s in output if ':' in s ]:
-        k,v = str.split(':', 1)
-        if len(k.split('#')) > 1: k = k.split('#')[-1]
-        dict[k.strip()] = v.strip()
-    return dict
 
 def main():
     

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # update_postman_vars.py                                                     #
-# Solution Deployer, Version 7.4.x b100                                      #
+# Solution Deployer, Version 7.4.x b110                                      #
 # -------------------------------------------------------------------------- #
 # Maintainers: CSE Telco/MSSP EMEA, Fortinet (internal use only)             #
 # -------------------------------------------------------------------------- #
