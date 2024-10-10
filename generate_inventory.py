@@ -27,7 +27,7 @@ def printInventory(cfg, in_file):
         csvOut = csv.DictWriter(s, csvIn.fieldnames)
         csvOut.writeheader()
         for d in csvIn:
-            d['sn'] = getSN(d['name'], cfg)
+            d['Serial Number'] = getSN(d['Name'], cfg)
             csvOut.writerow(d)
         print(s.getvalue())
 
