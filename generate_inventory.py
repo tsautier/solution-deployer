@@ -1,42 +1,24 @@
 #!/usr/bin/env python3
 
 # generate_inventory.py                                                      #
-# Solution Deployer, Version 7.4.x b100                                      #
+# Solution Deployer, Version 7.4.x b110                                      #
 # -------------------------------------------------------------------------- #
 # Maintainers: CSE Telco/MSSP EMEA, Fortinet (internal use only)             #
 # -------------------------------------------------------------------------- #
 
 import csv, io
-from yaml import safe_load
-from paramiko import SSHClient, AutoAddPolicy, ssh_exception
-from contextlib import redirect_stdout
 from orch_base import *
 
-def __doGetSN(client, fgt, cfg):
-    client.connect(
-        fgt['ip'],
-        port = fgt.get('port', 22),
-        username = cfg['fgt_user'],
-        password = cfg['fgt_password']
-    )
-    stdin, stdout, stderr = client.exec_command('get system status')
-    return next(l.split(': ')[1].strip() for l in stdout.readlines() if ("Serial-Number" in l))
 
 def getSN(fgt_name, cfg):
-    fgt = cfg['sites'][fgt_name]
-    client = SSHClient()
-    client.set_missing_host_key_policy(AutoAddPolicy())
-
-    try:
-        sn = __doGetSN(client, fgt, cfg)
-    except ssh_exception.AuthenticationException as e:
-        with (redirect_stdout(io.StringIO())):
-            setNewPassword(client, fgt, cfg)
-        sn = __doGetSN(client, fgt, cfg)
-    finally:
-        client.close()
-
-    return sn
+    task = {
+        'site': fgt_name,
+        'cli': 'get system status'
+    }
+    devStatus = getSystemStatus(
+        runCLICommandTask(cfg, task, silent=True)
+    )
+    return devStatus['Serial-Number']
 
 
 def printInventory(cfg, in_file):
@@ -52,13 +34,13 @@ def printInventory(cfg, in_file):
 
 def main():
 
-    tenantdir = "tenants/CustomerU"
-    with open(tenantdir + '/config.yaml', 'r') as cfgfile:
-        cfg = safe_load(cfgfile)
-        print()
-        print("inventory.CustomerU.csv")
-        print("=======================")            
-        printInventory(cfg, tenantdir + '/inventory.CustomerU.j2')            
+    cfg = readConfig(silent=True)
+    invFile = "inventory." + cfg['tenant']
+
+    print()
+    print(invFile+'.csv')
+    print(f"{'':=>{len(invFile+'.csv')}}")
+    printInventory(cfg, cfg['tenantdir']+'/'+invFile+'.j2')
 
 
 if __name__ == "__main__":
