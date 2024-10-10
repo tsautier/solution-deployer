@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # orch_base.py                                                               #
-# Solution Deployer, Version 7.4.x b100.1                                    #
+# Solution Deployer, Version 7.4.x b110                                      #
 # -------------------------------------------------------------------------- #
 # Maintainers: CSE Telco/MSSP EMEA, Fortinet (internal use only)             #
 # -------------------------------------------------------------------------- #
@@ -13,21 +13,24 @@ from paramiko_expect import SSHClientInteraction
 from yaml import safe_load
 from fmg_api.api_base import ApiSession
 
-def readConfig():
+def readConfig(silent=False):
 
     tenant = os.environ.get("ORCH_TENANT") or \
         (Path('.orch_tenant').read_text().strip() if Path('.orch_tenant').exists() else "")
 
-    print("========================")
-    print(" Tenant: " + tenant)
-    print("========================")
+    silent or print("========================")
+    silent or print(" Tenant: " + tenant)
+    silent or print("========================")
     tenantdir = "tenants/" + tenant
 
     with open(tenantdir + '/config.yaml', 'r') as cfgfile:
         cfg = safe_load(cfgfile)
 
-    print("FMG Host = " + cfg['fmg_host'])
-    print("ADOM = " + cfg['fmg_adom'])
+    silent or print("FMG Host = " + cfg['fmg_host'])
+    silent or print("ADOM = " + cfg['fmg_adom'])
+
+    cfg['tenant'] = tenant
+    cfg['tenantdir'] = tenantdir
 
     return cfg
 
@@ -58,6 +61,14 @@ def setNewPassword(client, fgt, cfg):
     interact.expect('.*')    
     print('<')       
     print("The new password has been set successfully!")  
+
+def getSystemStatus(output):
+    dict = {}
+    for str in [ s for s in output if ':' in s ]:
+        k,v = str.split(':', 1)
+        if len(k.split('#')) > 1: k = k.split('#')[-1]
+        dict[k.strip()] = v.strip()
+    return dict
 
 ###################
 # Deployment Tasks
