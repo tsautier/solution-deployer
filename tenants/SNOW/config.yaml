@@ -1,8 +1,8 @@
 ---
-fmg_host: 34.154.21.246:14006
+fmg_host: 34.17.50.50:14006
 fmg_user: admin
 fmg_password: fortinet
-fmg_adom: SNOW
+fmg_adom: CustomerX
 
 postman_collection: tenants/SNOW/api.collection.json
 default_tags: none

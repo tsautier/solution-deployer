@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "bae5d3b5-22c2-44d6-bb19-29cb6b953bd2",
+		"_postman_id": "3eeaa4e7-f367-4ef4-9d18-7fca07cca4bc",
 		"name": "SNOW",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "34555259"
+		"_exporter_id": "35013783"
 	},
 	"item": [
 		{
@@ -31,8 +31,7 @@
 								"header": [
 									{
 										"key": "Content-Type",
-										"value": "application/json",
-										"uuid": "bee3c53e-41dd-403b-9216-961b9188da04"
+										"value": "application/json"
 									}
 								],
 								"body": {
@@ -76,8 +75,7 @@
 								"header": [
 									{
 										"key": "Content-Type",
-										"value": "application/json",
-										"uuid": "ff443a55-930a-47bc-a401-e76607351b18"
+										"value": "application/json"
 									}
 								],
 								"body": {
@@ -126,8 +124,7 @@
 								"header": [
 									{
 										"key": "Content-Type",
-										"value": "application/json",
-										"uuid": "7cd78d62-7d15-4705-875a-b4db47d307a1"
+										"value": "application/json"
 									}
 								],
 								"body": {
@@ -171,8 +168,7 @@
 								"header": [
 									{
 										"key": "Content-Type",
-										"value": "application/json",
-										"uuid": "e58322bc-ec26-4d68-9b3a-5a0d6b8d0af8"
+										"value": "application/json"
 									}
 								],
 								"body": {
@@ -220,8 +216,7 @@
 								"header": [
 									{
 										"key": "Content-Type",
-										"value": "application/json",
-										"uuid": "d2678926-3933-4264-960a-c686ce9549f9"
+										"value": "application/json"
 									}
 								],
 								"body": {
@@ -248,8 +243,7 @@
 								"header": [
 									{
 										"key": "Content-Type",
-										"value": "application/json",
-										"uuid": "d6bba516-bce9-4b27-9552-3c2b853cb5c2"
+										"value": "application/json"
 									}
 								],
 								"body": {
@@ -276,8 +270,7 @@
 								"header": [
 									{
 										"key": "Content-Type",
-										"value": "application/json",
-										"uuid": "80c12894-f8d5-4d46-b3ef-3196c30bb916"
+										"value": "application/json"
 									}
 								],
 								"body": {
@@ -304,8 +297,7 @@
 								"header": [
 									{
 										"key": "Content-Type",
-										"value": "application/json",
-										"uuid": "ad444e4b-a6d2-4ba7-96b0-f97ccc47d201"
+										"value": "application/json"
 									}
 								],
 								"body": {
@@ -348,8 +340,7 @@
 								"header": [
 									{
 										"key": "Content-Type",
-										"value": "application/json",
-										"uuid": "72e67ab0-b2cd-4146-a3f2-5d9082a81287"
+										"value": "application/json"
 									}
 								],
 								"body": {
@@ -388,8 +379,7 @@
 								"header": [
 									{
 										"key": "Content-Type",
-										"value": "application/json",
-										"uuid": "1f0b11c1-d7d0-4c74-92ca-3aa66cdd9f8f"
+										"value": "application/json"
 									}
 								],
 								"body": {
@@ -433,8 +423,7 @@
 								"header": [
 									{
 										"key": "Content-Type",
-										"value": "application/json",
-										"uuid": "b2e2e213-5365-4d36-b35e-1c13b4fb79e8"
+										"value": "application/json"
 									}
 								],
 								"body": {
@@ -472,8 +461,7 @@
 								"header": [
 									{
 										"key": "Content-Type",
-										"value": "application/json",
-										"uuid": "a08ebb70-66b6-4cc8-94e7-8d35d15c4551"
+										"value": "application/json"
 									}
 								],
 								"body": {
@@ -517,8 +505,7 @@
 								"header": [
 									{
 										"key": "Content-Type",
-										"value": "application/json",
-										"uuid": "9698cc42-ef93-4098-a140-d7f6d6499bc7"
+										"value": "application/json"
 									}
 								],
 								"body": {
@@ -561,8 +548,7 @@
 								"header": [
 									{
 										"key": "Content-Type",
-										"value": "application/json",
-										"uuid": "d9ddc620-2289-4ffb-8a9c-7483fd3a6d53"
+										"value": "application/json"
 									}
 								],
 								"body": {
@@ -620,8 +606,7 @@
 								"header": [
 									{
 										"key": "Content-Type",
-										"value": "application/json",
-										"uuid": "23a5889b-d948-4915-8d28-20934a1b4be9"
+										"value": "application/json"
 									}
 								],
 								"body": {
@@ -660,8 +645,7 @@
 								"header": [
 									{
 										"key": "Content-Type",
-										"value": "application/json",
-										"uuid": "73bc71df-d610-4735-adae-45766f58b222"
+										"value": "application/json"
 									}
 								],
 								"body": {
@@ -710,8 +694,7 @@
 								"header": [
 									{
 										"key": "Content-Type",
-										"value": "application/json",
-										"uuid": "64b6101b-fa00-41fb-ada2-08d7fc15a0b7"
+										"value": "application/json"
 									}
 								],
 								"body": {
@@ -755,8 +738,7 @@
 								"header": [
 									{
 										"key": "Content-Type",
-										"value": "application/json",
-										"uuid": "699492ab-bb05-455b-9a40-313f501cf3a9"
+										"value": "application/json"
 									}
 								],
 								"body": {
@@ -811,8 +793,7 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"uuid": "51af2ba4-7f36-4b02-9912-98b56ecc740b"
+								"value": "application/json"
 							}
 						],
 						"body": {
@@ -856,13 +837,12 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"uuid": "2516a0f0-3eeb-4497-9453-38702a783741"
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"session\": \"{{session}}\",\n    \"id\": 1,\n    \"method\": \"clone\",\n    \"params\": [\n        {\n            \"url\": \"/dvmdb/adom/MASTER_SuperWAN\",\n            \"data\": {\n                \"name\": \"{{adom}}\"\n            }\n        }\n    ]\n}",
+							"raw": "{\n    \"session\": \"{{session}}\",\n    \"id\": 1,\n    \"method\": \"clone\",\n    \"params\": [\n        {\n            \"url\": \"/dvmdb/adom/{{master_adom}}\",\n            \"data\": {\n                \"name\": \"{{adom}}\"\n            }\n        }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -924,8 +904,7 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"uuid": "f41a4331-bc3c-46ef-b166-a00decd34ec1"
+								"value": "application/json"
 							}
 						],
 						"body": {
@@ -957,8 +936,7 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"uuid": "a7a6e717-c100-45a7-a7c7-cffac46b94b6"
+								"value": "application/json"
 							}
 						],
 						"body": {
@@ -997,8 +975,7 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"uuid": "76af729d-82de-4208-aa68-ce2ba124565b"
+								"value": "application/json"
 							}
 						],
 						"body": {
@@ -1101,84 +1078,11 @@
 									"    if (!pm.environment.has(vars[i]))",
 									"        pm.variables.set(vars[i], \"\");",
 									"}",
-									"",
-									"if (pm.environment.has(\"is_hub\"))",
-									"    pm.variables.set(\"is_edge\", \"\")",
-									"else",
-									"    pm.variables.set(\"is_edge\", \"Edge-\")"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"uuid": "35201b68-646b-4e20-b022-efd188ea98af"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"id\": 1,\n    \"session\": \"{{session}}\",\n    \"method\": \"exec\",\n    \"params\": [\n        {\n            \"url\": \"/dvm/cmd/add/dev-list\",\n            \"data\": {\n                \"adom\": \"{{adom}}\",\n                \"flags\": [\n                    \"create_task\",\n                    \"nonblocking\"\n                ],\n                \"add-dev-list\": [\n                    {\n                        \"name\": \"{{hostname}}\",\n                        \"device action\": \"add_model\",\n                        \"device blueprint\": \"{{is_edge}}{{profile}}-{{model}}\",\n                        \"mgmt_mode\": 3,\n                        \"adm_usr\": \"admin\",\n                        \"os_type\": 0,\n                        \"os_ver\": 7,\n                        \"mr\": 4,\n                        \"psk\": \"{{hostname}}-secret\"\n                    }\n                ]\n            }\n        }\n    ]\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "https://{{ip}}/jsonrpc",
-							"protocol": "https",
-							"host": [
-								"{{ip}}"
-							],
-							"path": [
-								"jsonrpc"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Assign Pre-Run CLI Template",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
 									""
 								],
 								"type": "text/javascript",
 								"packages": {}
 							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"if (pm.environment.get(\"model\") == \"VM\")",
-									"{",
-									"    console.log(\"This is a VM, creating 'physical' interfaces...\")",
-									"    pm.variables.set(\"pre_run\", \"provision_interfaces_on_vm\");",
-									"}",
-									"else if ([\"40F\", \"100F\"].includes(pm.environment.get(\"model\"))) ",
-									"{",
-									"    console.log(\"Splitting factory-default hardware switch ports...\")",
-									"    pm.variables.set(\"pre_run\", \"split_hardware_switch_ports_40_80_100\");",
-									"}",
-									"else",
-									"{",
-									"    console.log(\"Skipping based on device model...\");",
-									"    pm.execution.skipRequest()",
-									"}"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
 						}
 					],
 					"request": {
@@ -1186,13 +1090,12 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"uuid": "bfaef232-3d0a-49d9-bd3d-eff80b05d84d"
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"id\": \"1\",\n    \"session\": \"{{session}}\",\n    \"method\": \"add\",\n    \"params\": [\n        {\n            \"url\": \"/pm/config/adom/{{adom}}/obj/cli/template/{{pre_run}}/scope member\",\n            \"data\": [\n                {\n                    \"name\": \"{{hostname}}\",\n                    \"vdom\": \"global\"\n                }\n            ]\n        }\n    ]\n}",
+							"raw": "{\n    \"id\": 1,\n    \"session\": \"{{session}}\",\n    \"method\": \"exec\",\n    \"params\": [\n        {\n            \"url\": \"/dvm/cmd/add/dev-list\",\n            \"data\": {\n                \"adom\": \"{{adom}}\",\n                \"flags\": [\n                    \"create_task\",\n                    \"nonblocking\"\n                ],\n                \"add-dev-list\": [\n                    {\n                        \"name\": \"{{hostname}}\",\n                        \"device action\": \"add_model\",\n                        \"device blueprint\": \"{{profile}}-{{model}}\",\n                        \"mgmt_mode\": 3,\n                        \"adm_usr\": \"admin\",\n                        \"os_type\": 0,\n                        \"os_ver\": 7,\n                        \"mr\": 4,\n                        \"psk\": \"{{hostname}}-secret\"\n                    }\n                ]\n            }\n        }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1257,8 +1160,7 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"uuid": "a42a1192-7596-4d5a-8318-0a0b24cd2760"
+								"value": "application/json"
 							}
 						],
 						"body": {
@@ -1343,8 +1245,7 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"uuid": "1d474b95-5885-4736-b005-f5e8554c9d80"
+								"value": "application/json"
 							}
 						],
 						"body": {
@@ -1365,53 +1266,19 @@
 					"response": []
 				},
 				{
-					"name": "Install Policy - Hubs",
+					"name": "Get Policy Name",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"function waitOnTask(retries) {",
-									"    if (!retries) {",
-									"        pm.test(\"Task completed\", function() {",
-									"            pm.expect(0).to.equal(1, \"Timeout while waiting for task completion\");     ",
-									"        });",
-									"        postman.setNextRequest(null);",
-									"    }",
-									"    else {",
-									"        pm.sendRequest({",
-									"            url: \"https://\" + pm.environment.get(\"ip\") + \"/jsonrpc\",",
-									"            method: 'POST',",
-									"            header: \"Content-Type:application/json\",",
-									"            body: {",
-									"                mode: 'raw',",
-									"                raw: JSON.stringify({\"session\": pm.environment.get(\"session\"), \"id\": 1, \"method\": \"get\",\"params\": [{\"url\": \"/task/task/\" + taskid}]})",
-									"            }",
-									"        }, function(err, response) {",
-									"            var jsonData = response.json();",
-									"            if (jsonData.result[0].data.percent == 100) {",
-									"                // Task completed",
-									"                if (jsonData.result[0].data.num_err) {",
-									"                    postman.setNextRequest(null);",
-									"                }",
-									"                pm.test(\"Task completed\", function() {",
-									"                    pm.expect(jsonData.result[0].data.num_err).to.equal(0, \"Failed for some devices\");     ",
-									"                });",
-									"            }",
-									"            else {",
-									"                console.log(\"Task is still not complete\");",
-									"                setTimeout(function() {",
-									"                    waitOnTask(--retries);",
-									"                }, 10000);",
-									"            }",
-									"        }); ",
-									"    }",
+									"var data = JSON.parse(pm.response.text());",
+									"var assignment_info = data['result'][0]['data']['vdom'][0]['assignment info']",
+									"",
+									"for (i of assignment_info) {",
+									"    if (i['type'] == 'policy') ",
+									"        pm.environment.set(\"pkg\", i['name'])",
 									"}",
-									"",
-									"var jsonData = pm.response.json();",
-									"var taskid = jsonData.result[0].data.task;",
-									"",
-									"waitOnTask(10);",
 									""
 								],
 								"type": "text/javascript",
@@ -1422,11 +1289,6 @@
 							"listen": "prerequest",
 							"script": {
 								"exec": [
-									"if (!pm.environment.has(\"is_hub\"))",
-									"{",
-									"    console.log(\"This is not a Hub, skipping...\");",
-									"    pm.execution.skipRequest()",
-									"}",
 									""
 								],
 								"type": "text/javascript",
@@ -1439,13 +1301,12 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"uuid": "9efb2f75-ae4b-4ea0-a878-3ef703a6b476"
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"session\": \"{{session}}\",\n    \"id\": 1,\n    \"method\": \"exec\",\n    \"params\": [\n        {\n            \"url\": \"/securityconsole/install/package\",\n            \"data\": [\n                {\n                    \"adom\": \"{{adom}}\",\n                    \"pkg\": \"Hub\",\n                    \"scope\": [\n                        {\n                            \"name\": \"Hubs\"\n                        }\n                    ],\n                    \"flags\": \"none\"\n                }\n            ]\n        }\n    ]\n}"
+							"raw": "{\n    \"session\": \"{{session}}\",\n    \"id\": 1,\n    \"method\": \"get\",\n    \"params\": [\n        {\n            \"url\": \"/dvmdb/device/{{hostname}}\",\n            \"option\": [\n                \"extra info\",\n                \"assignment info\"\n            ]\n        }\n    ]\n}"
 						},
 						"url": {
 							"raw": "https://{{ip}}/jsonrpc",
@@ -1461,7 +1322,7 @@
 					"response": []
 				},
 				{
-					"name": "Install Policy - Edge",
+					"name": "Install Policy",
 					"event": [
 						{
 							"listen": "test",
@@ -1518,11 +1379,7 @@
 							"listen": "prerequest",
 							"script": {
 								"exec": [
-									"if (pm.environment.has(\"is_hub\"))",
-									"{",
-									"    console.log(\"This is not an Edge device, skipping...\");",
-									"    pm.execution.skipRequest()",
-									"}"
+									""
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -1534,13 +1391,12 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"uuid": "944b9e31-4526-4f7e-b6c8-91115e87be8f"
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"session\": \"{{session}}\",\n    \"id\": 1,\n    \"method\": \"exec\",\n    \"params\": [\n        {\n            \"url\": \"/securityconsole/install/package\",\n            \"data\": [\n                {\n                    \"adom\": \"{{adom}}\",\n                    \"pkg\": \"Edge\",\n                    \"scope\": [\n                        {\n                            \"name\": \"Edge\"\n                        }\n                    ],\n                    \"flags\": \"none\"\n                }\n            ]\n        }\n    ]\n}"
+							"raw": "{\n    \"session\": \"{{session}}\",\n    \"id\": 1,\n    \"method\": \"exec\",\n    \"params\": [\n        {\n            \"url\": \"/securityconsole/install/package\",\n            \"data\": [\n                {\n                    \"adom\": \"{{adom}}\",\n                    \"pkg\": \"{{pkg}}\",\n                    \"scope\": [\n                        {\n                            \"name\": \"{{hostname}}\",\n                            \"vdom\": \"root\"\n                        }\n                    ],\n                    \"flags\": \"none\"\n                }\n            ]\n        }\n    ]\n}"
 						},
 						"url": {
 							"raw": "https://{{ip}}/jsonrpc",
@@ -1578,8 +1434,7 @@
 				"header": [
 					{
 						"key": "Content-Type",
-						"value": "application/json",
-						"uuid": "3015b1f3-1c2f-4501-8ded-79e7caa7a820"
+						"value": "application/json"
 					}
 				],
 				"body": {
@@ -1620,8 +1475,7 @@
 				"header": [
 					{
 						"key": "Content-Type",
-						"value": "application/json",
-						"uuid": "320ee1da-dedc-4a13-8501-aa7f113f4530"
+						"value": "application/json"
 					}
 				],
 				"body": {
