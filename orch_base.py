@@ -108,11 +108,11 @@ def createModelDevicesTask(session, task, silent=False):
     dev_list, vars = [], {}
     with open(task['src'], 'r', encoding='utf-8-sig') as f:
         for d in csv.DictReader(f):
-            dev_name = d.pop('name')
+            dev_name = d.pop('Name')
             dev_list.append({
                 "name": dev_name,
-                "blueprint": d.pop('device blueprint'),
-                "sn": d.pop('sn')
+                "blueprint": d.pop('Device Blueprint'),
+                "sn": d.pop('Serial Number')
             })
             for k, v in d.items():
                 vars.setdefault(k, {})
@@ -132,7 +132,7 @@ def onboardDevicesTask(cfg, task, silent=False):
         silent or print(f"Factory-resetting devices from {task['src']}...")
         silent or print("NOTE: We won't wait until they finish ZTP process, so check it afterwards!")
         with open(task['src'], 'r', encoding='utf-8-sig') as f:
-            dev_list = [ d['name'] for d in csv.DictReader(f) ]
+            dev_list = [ d['Name'] for d in csv.DictReader(f) ]
     elif 'site' in task:
         silent or print(f"Factory-resetting device {task['site']}...")
         silent or print("NOTE: We won't wait until it finishes ZTP process, so check it afterwards!")
