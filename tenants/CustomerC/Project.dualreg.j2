@@ -4,7 +4,7 @@
 {# Normally, this is the only file that needs to be edited between            #}
 {# different projects                                                         #}
 {# -------------------------------------------------------------------------- #}
-{# Design flavor: "BGP on Loopback"                                           #}
+{# Design flavor: "Dynamic BGP on Loopback"                                   #}
 {# Please contact your Fortinet representatives for more details              #}
 
 {#
@@ -14,30 +14,28 @@
     - loopback
     - profile
     - region
+    - mpls_wan_ip
     - lan_ip
-    - mpls_wan_ip (whenever the profile includes MPLS link)
-    - mpls_wan_gateway (whenever the profile includes MPLS link)
 #}
 
-{# Optional Settings #}
-{% set multireg_advpn = true %}
+{# Optional defaults (can be overriden by profiles) #}
+{% set dynamic_bgp = true %}
 
 {#  Mandatory Global Definitions #}
 {% set lo_summary = '10.200.0.0/14' %}
-{% set lan_summary = '10.0.0.0/8' %}
 
 {# Regions #}
 {% set regions = {
     'West': {
       'as': '65001',
-      'lan_summary': '10.0.0.0/14',
       'lo_summary': '10.200.1.0/24',
+      'lan_summary': '10.0.0.0/14',
       'hubs': [ 'site1-H1', 'site1-H2' ]
     },
     'East': {
       'as': '65002',
-      'lan_summary': '10.4.0.0/14',
       'lo_summary': '10.200.2.0/24',
+      'lan_summary': '10.4.0.0/14',
       'hubs': [ 'site2-H1' ]
     }
   }
@@ -46,58 +44,55 @@
 {# Device Profiles #}
 {% set profiles = {
 
-    'Silver': {
+   'Silver': {
       'interfaces': [
-        {
-          'name': 'port1',
-          'role': 'wan',
-          'ol_type': 'ISP1',
-          'ip': 'dhcp',
-          'dia': true
-        },
-        {
-          'name': 'port4',
-          'role': 'wan',
-          'ol_type': 'MPLS',
-          'ip': mpls_wan_ip
-        },
-        {
-          'name': 'port5',
-          'role': 'lan',
-          'ip': lan_ip
-        }
+         {
+            'name': 'port1',
+            'role': 'wan',
+            'ol_type': 'ISP1',
+            'ip': 'dhcp'
+         },
+         {
+            'name': 'port4',
+            'role': 'wan',
+            'ol_type': 'MPLS',
+            'ip': mpls_wan_ip
+         },
+         {
+            'name': 'port5',
+            'role': 'lan',
+            'ip': lan_ip
+         }
       ]
-    },
+   },
 
-    'Gold': {
+   'Gold': {
       'interfaces': [
-        {
-          'name': 'port1',
-          'role': 'wan',
-          'ol_type': 'ISP1',
-          'ip': 'dhcp',
-          'dia': true
-        },
-        {
-          'name': 'port2',
-          'role': 'wan',
-          'ol_type': 'ISP2',
-          'ip': 'dhcp',
-          'dia': true
-        },
-        {
-          'name': 'port4',
-          'role': 'wan',
-          'ol_type': 'MPLS',
-          'ip': mpls_wan_ip
-        },
-        {
-          'name': 'port5',
-          'role': 'lan',
-          'ip': lan_ip
-        }
+         {
+            'name': 'port1',
+            'role': 'wan',
+            'ol_type': 'ISP1',
+            'ip': 'dhcp'
+         },
+         {
+            'name': 'port2',
+            'role': 'wan',
+            'ol_type': 'ISP2',
+            'ip': 'dhcp'
+         },
+         {
+            'name': 'port4',
+            'role': 'wan',
+            'ol_type': 'MPLS',
+            'ip': mpls_wan_ip
+         },
+         {
+            'name': 'port5',
+            'role': 'lan',
+            'ip': lan_ip
+         }
       ]
-    }
+   }
 
   }
 %}
@@ -124,7 +119,7 @@
     },
 
     'site1-H2': {
-      'lo_bgp': '10.200.1.254',
+      'lo_bgp': '10.200.1.254',    
       'overlays': {
         'ISP1': {
           'wan_ip': '100.64.2.1',
@@ -142,7 +137,7 @@
     },
 
     'site2-H1': {
-      'lo_bgp': '10.200.2.253',
+      'lo_bgp': '10.200.2.253',      
       'overlays': {
         'ISP1': {
           'wan_ip': '100.64.4.1',
@@ -153,7 +148,7 @@
           'network_id': '43'
         }
       }
-    }
+    }    
 
   }
 %}

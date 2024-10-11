@@ -54,13 +54,17 @@ tasks:
     folder: Foundation
   - name: Import Project Template
     type: cli_templates
-    src: tenants/CustomerC/Project.j2
+    src: tenants/CustomerC/Project.dualreg.j2
+    rename: Project
   - name: Import Jinja CLI Templates
     type: cli_templates
-    src: /Users/dperets/git/sdwan-advpn-reference/bgp-on-loopback/*.j2
+    src: /Users/dperets/git/sdwan-advpn-reference/dynamic-bgp-on-lo/*.j2
   - name: Create CLI Template Groups
     type: postman
     folder: Create CLI Template Groups
+  - name: Create Template Groups
+    type: postman
+    folder: Create Template Groups
   - name: Create Device Blueprints
     type: postman
     folder: Device Blueprints
