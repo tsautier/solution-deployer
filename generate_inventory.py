@@ -35,7 +35,7 @@ def printInventory(cfg, in_file):
 def main():
 
     cfg = readConfig(silent=True)
-    invFile = "inventory." + cfg['tenant']
+    invFile = "inventory." + cfg['fmg_adom']
 
     print()
     print(invFile+'.csv')
