@@ -61,6 +61,21 @@ config router static
         set priority 10
         set device "port5"
     next
+    edit 11
+        set dst 192.2.0.0 255.255.255.224
+        set gateway 128.66.0.192
+        set device "port9"
+    next
+    edit 12
+        set dst 203.0.113.0 255.255.255.0
+        set gateway 128.66.0.203
+        set device "port9"
+    next
+    edit 13
+        set dst 100.64.0.0 255.255.0.0
+        set gateway 128.66.0.100
+        set device "port9"
+    next    
     edit 100
         set gateway 192.168.0.254
         set distance 1
