@@ -8,6 +8,8 @@ status_fail=0
 # Finalize FGT configuration
 ./configure_devices.py || status_fail=1
 
+sleep 5
+
 # Update public IPs in Postman variables (CustomerU)
 ./update_postman_vars.py || status_fail=1
 
