@@ -8,9 +8,15 @@ status_fail=0
 # Finalize FGT configuration
 ./configure_devices.py || status_fail=1
 
-sleep 5
-
 # Update public IPs in Postman variables (CustomerU)
-./update_postman_vars.py || status_fail=1
+retries=5 
+until ./update_postman_vars.py || [ $retries -le 0 ]
+do
+    echo -e "\n\033[0;33mWARNING:\033[0m No Internet access for the lab FGTs yet (retries left = $retries)"
+    sleep 5
+    ((retries--))
+done
+
+[ $retries -gt 0 ] || status_fail=1 
 
 exit $status_fail
