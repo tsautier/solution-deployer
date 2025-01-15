@@ -58,7 +58,7 @@ def setNewPassword(client, fgt, cfg, silent=False):
     interact.send(cfg['fgt_password'])
     interact.expect('Confirm Password: ')
     interact.send(cfg['fgt_password'])
-    interact.expect('.*')    
+    interact.expect('.*# ')    
     silent or print('<')       
     silent or print("The new password has been set successfully!")  
 
