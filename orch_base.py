@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # orch_base.py                                                               #
-# Solution Deployer, Version 7.4.x b110                                      #
+# Solution Deployer, Version 7.4.x b115                                      #
 # -------------------------------------------------------------------------- #
 # Maintainers: CSE Telco/MSSP EMEA, Fortinet (internal use only)             #
 # -------------------------------------------------------------------------- #
@@ -109,10 +109,13 @@ def createModelDevicesTask(session, task, silent=False):
     with open(task['src'], 'r', encoding='utf-8-sig') as f:
         for d in csv.DictReader(f):
             dev_name = d.pop('Name')
+            fos_ver = str(task.get('fos', '7.4'))
             dev_list.append({
                 "name": dev_name,
                 "blueprint": d.pop('Device Blueprint'),
-                "sn": d.pop('Serial Number')
+                "sn": d.pop('Serial Number'),
+                "os_ver": int(fos_ver.split('.')[0]),
+                "os_mr": int(fos_ver.split('.')[1])
             })
             for k, v in d.items():
                 vars.setdefault(k, {})
