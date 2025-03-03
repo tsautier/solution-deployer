@@ -29,6 +29,11 @@ def main():
         type=lambda s: [t for t in s.split(',')],
         default=cfg.get('default_skip_tags', None)
     )
+    parser.add_argument(
+        '--verbose', 
+        action='store_true',
+        help='more verbose output'
+    )    
     args = parser.parse_args()
    
     print()
@@ -50,7 +55,7 @@ def main():
 
         try:
             if task['type'] == 'postman':
-                runPostmanTask(cfg, session, task)
+                runPostmanTask(cfg, session, task, args.verbose)
             elif task['type'] == 'cli_templates':
                 importCLITemplateTask(session, task)
             elif task['type'] == 'delete_devices':
