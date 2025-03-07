@@ -67,10 +67,12 @@ def main():
                     raise Exception("Skipping the onboarding, because (some of) the previous tasks failed!")
                 onboardDevicesTask(cfg, task)
             success += 1
+            print()
+            print(f"\033[32m\033[1mTASK {i} SUCCEEDED.\033[0m")
         except Exception as e:
             fail += 1
             print()
-            print(f"\033[91m\033[1mTASK FAILED:\033[0m {e}") 
+            print(f"\033[91m\033[1mTASK {i} FAILED:\033[0m {e}") 
 
     print()
     print(f"All done! \033[32mSuccess: {success}\033[0m, \033[91mFail: {fail}\033[0m")
