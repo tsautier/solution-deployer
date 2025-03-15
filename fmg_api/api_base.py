@@ -18,12 +18,15 @@ class ApiSession:
     _session = None
     __request_number = 0
 
+    verbose = False
+
     def __init__(self, url, adom, user, password):
         self.url = url
         self.adom = adom
         self.login(user, password)
 
     def __del__(self):
+        self.verbose = False
         self.logout()
 
     def __is_task_finished(self, id):
@@ -76,6 +79,25 @@ class ApiSession:
             content["result"][0]["status"]["message"] == "OK"
 
 
+    @staticmethod
+    def __print_request_response(request, response):
+
+        try:
+            print("\033[2m")
+            print("---- Request ----")
+            print(f"{response.request.method} {response.request.url}")
+            print("Body:")
+            print(json.dumps(request, indent=4))
+
+            print("\n---- Response ----")
+            print(f"Status Code: {response.status_code}")
+            print("Body:")
+            print(json.dumps(response.json(), indent=4))
+
+        finally:
+            print("\033[0m")
+
+
     def _run_request(self, payload, name=""):
         print("Running request \033[33m" + str(self.__request_number) +
               "\033[39m. \033[93m" + name + "\033[39m")
@@ -89,9 +111,10 @@ class ApiSession:
         response = requests.request("POST", self.url, data=json.dumps(
             payload), headers=headers, verify=False)
 
+        if self.verbose or not ApiSession.__is_request_status_ok(response): 
+            ApiSession.__print_request_response(payload, response)
         if not ApiSession.__is_request_status_ok(response):
-            print(" Error in request.")
-            print(response.text)
+            print(" \033[91mError in request.\033[0m")
             raise Exception(response.text)
 
         content = json.loads(response.content)
@@ -113,9 +136,10 @@ class ApiSession:
         response = requests.request("POST", self.url, data=json.dumps(
             payload), headers=headers, verify=False)
 
+        if self.verbose or not ApiSession.__is_request_status_ok(response): 
+            ApiSession.__print_request_response(payload, response)
         if not ApiSession.__is_request_status_ok(response):
-            print(" Error in request.")
-            print(response.text)
+            print(" \033[91mError in request.\033[0m")
             raise Exception(response.text)
 
         content = json.loads(response.content)

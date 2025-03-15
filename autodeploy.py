@@ -9,7 +9,11 @@
 import argparse
 from orch_base import *
 
+DEPLOYER_VER = "7.6.x b120"
+
 def main():
+
+    print(f"Solution Deployer, Version {DEPLOYER_VER}")
 
     # Config from config.yaml
     cfg = readConfig()
@@ -37,6 +41,10 @@ def main():
     args = parser.parse_args()
    
     print()
+    if args.verbose: 
+        print("Verbose mode ON.")
+        session.verbose = True
+
     print("Running automated deployment sequence...")
 
     success, fail = 0, 0
@@ -55,7 +63,7 @@ def main():
 
         try:
             if task['type'] == 'postman':
-                runPostmanTask(cfg, session, task, args.verbose)
+                runPostmanTask(cfg, session, task)
             elif task['type'] == 'cli_templates':
                 importCLITemplateTask(session, task)
             elif task['type'] == 'delete_devices':

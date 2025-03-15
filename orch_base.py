@@ -74,13 +74,13 @@ def getSystemStatus(output):
 # Deployment Tasks
 ###################
 
-def runPostmanTask(cfg, session, task, verbose=False, silent=False):
+def runPostmanTask(cfg, session, task, silent=False):
     silent or print(f"Running Postman collection - {task['folder']}...")
     vars = {}
     if 'vars' in task:
         with open(task['vars'], 'r') as varfile:
             vars = safe_load(varfile)
-    command = __getNewmanCommand(cfg, session, vars, verbose, silent)
+    command = __getNewmanCommand(cfg, session, vars, silent)
     command.append(f"--folder \"{task['folder']}\"")
     if os.system(' '.join(command)): 
         raise Exception("Postman run ended with error(s)!")
@@ -266,7 +266,7 @@ def __applyCLIConfig(client, fgt, cfg, cli_config, silent=False):
 
     return output    
 
-def __getNewmanCommand(cfg, session, vars={}, verbose=False, silent=False):
+def __getNewmanCommand(cfg, session, vars={}, silent=False):
     command = []
     command.append('newman run')
     command.append('"' + cfg['postman_collection'] + '"')
@@ -277,6 +277,6 @@ def __getNewmanCommand(cfg, session, vars={}, verbose=False, silent=False):
     command.append('--env-var "adom=' + cfg['fmg_adom'] + '"')
     command.append('--env-var "session=' + session.getSessionCookie() + '"')
     for k,v in vars.items(): command.append('--env-var "' + k + '=' + str(v) + '"')
-    if verbose: command.append('--verbose')
+    if session.verbose: command.append('--verbose')
     if silent: command.append('--silent')
     return command      
