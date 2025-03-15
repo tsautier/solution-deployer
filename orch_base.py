@@ -118,8 +118,9 @@ def createModelDevicesTask(session, task, silent=False):
                 "os_mr": int(fos_ver.split('.')[1])
             })
             for k, v in d.items():
-                vars.setdefault(k, {})
-                vars[k][dev_name] = v
+                if v:
+                    vars.setdefault(k, {})
+                    vars[k][dev_name] = v
     silent or print(f"Devices: {[dev['name'] for dev in dev_list]}")
     silent or print(f"Variables: {[var for var in vars.keys()]}")
     session.deleteDevices(
