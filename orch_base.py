@@ -256,7 +256,15 @@ def __applyCLIConfig(client, fgt, cfg, cli_config, silent=False):
         timeout = 10
     )    
     stdin, stdout, stderr = client.exec_command(cli_config)
-    return stdout.readlines()    
+
+    output = []
+    while True:
+        line = stdout.readline()
+        if not line: break
+        # Handle '\r' for long outputs with "--More--"
+        output.append(line[line.rfind('\r')+1:])
+
+    return output    
 
 def __getNewmanCommand(cfg, session, vars={}, verbose=False, silent=False):
     command = []
