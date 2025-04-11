@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # autodeploy.py                                                              #
-# Solution Deployer, Version 7.6.x b120                                      #
+# Solution Deployer, Version 7.6.x b121                                      #
 # -------------------------------------------------------------------------- #
 # Maintainers: CSE Telco/MSSP EMEA, Fortinet (internal use only)             #
 # -------------------------------------------------------------------------- #
@@ -9,7 +9,7 @@
 import argparse
 from orch_base import *
 
-DEPLOYER_VER = "7.6.x b120"
+DEPLOYER_VER = "7.6.x b121"
 
 def main():
 

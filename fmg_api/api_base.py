@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # fmg_api/api_base.py                                                        #
-# Solution Deployer, Version 7.6.x b120                                      #
+# Solution Deployer, Version 7.6.x b121                                      #
 # -------------------------------------------------------------------------- #
 # Maintainers: CSE Telco/MSSP EMEA, Fortinet (internal use only)             #
 # -------------------------------------------------------------------------- #
@@ -48,7 +48,7 @@ class ApiSession:
         }
 
         response = requests.request("POST", self.url, data=json.dumps(
-            payload), headers=headers, verify=False)
+            payload), headers=headers, timeout=30, verify=False)
 
         if not self.__is_request_status_ok(response):
             print(" \033[31Error in request.\033[39m")
@@ -85,14 +85,15 @@ class ApiSession:
         try:
             print("\033[2m")
             print("---- Request ----")
-            print(f"{response.request.method} {response.request.url}")
+            if response: print(f"{response.request.method} {response.request.url}")
             print("Body:")
             print(json.dumps(request, indent=4))
 
-            print("\n---- Response ----")
-            print(f"Status Code: {response.status_code}")
-            print("Body:")
-            print(json.dumps(response.json(), indent=4))
+            if response:
+                print("\n---- Response ----")
+                print(f"Status Code: {response.status_code}")
+                print("Body:")
+                print(json.dumps(response.json(), indent=4))
 
         finally:
             print("\033[0m")
@@ -108,19 +109,26 @@ class ApiSession:
             'cache-control': "no-cache"
         }
 
-        response = requests.request("POST", self.url, data=json.dumps(
-            payload), headers=headers, verify=False)
+        response = None
+        try:
+            response = requests.request("POST", self.url, data=json.dumps(
+                payload), headers=headers, timeout=30, verify=False)
 
-        if self.verbose or not ApiSession.__is_request_status_ok(response): 
+            if not ApiSession.__is_request_status_ok(response):
+                print(" \033[91mError in request.\033[0m")
+                raise Exception(response.text)
+
+            content = json.loads(response.content)
+
+            if self.verbose: 
+                ApiSession.__print_request_response(payload, response)
+
+            print(" \033[92mCompleted\033[39m")
+            return content
+       
+        except Exception as e:
             ApiSession.__print_request_response(payload, response)
-        if not ApiSession.__is_request_status_ok(response):
-            print(" \033[91mError in request.\033[0m")
-            raise Exception(response.text)
-
-        content = json.loads(response.content)
-
-        print(" \033[92mCompleted\033[39m")
-        return content
+            raise e
 
 
     def _run_request_async(self, payload, name=""):
@@ -133,29 +141,36 @@ class ApiSession:
             'cache-control': "no-cache"
         }
 
-        response = requests.request("POST", self.url, data=json.dumps(
-            payload), headers=headers, verify=False)
-
-        if self.verbose or not ApiSession.__is_request_status_ok(response): 
-            ApiSession.__print_request_response(payload, response)
-        if not ApiSession.__is_request_status_ok(response):
-            print(" \033[91mError in request.\033[0m")
-            raise Exception(response.text)
-
-        content = json.loads(response.content)
+        response = None
         try:
-            task_id = content["result"][0]["data"]["taskid"]
-        except:
-            task_id = content["result"][0]["data"]["task"]
+            response = requests.request("POST", self.url, data=json.dumps(
+                payload), headers=headers, timeout=30, verify=False)
 
-        print(" Asynchronous task created: " +
-              str(task_id) + " ", end="", flush=False)
-        while not self.__is_task_finished(task_id):
-            print(".", end="", flush=True)
-            sleep(5)
+            if not ApiSession.__is_request_status_ok(response):
+                print(" \033[91mError in request.\033[0m")
+                raise Exception(response.text)
 
-        print("\n \033[92mCompleted\033[39m")
-        return content
+            content = json.loads(response.content)
+            try:
+                task_id = content["result"][0]["data"]["taskid"]
+            except:
+                task_id = content["result"][0]["data"]["task"]
+
+            if self.verbose: 
+                ApiSession.__print_request_response(payload, response)
+
+            print(" Asynchronous task created: " +
+                str(task_id) + " ", end="", flush=False)
+            while not self.__is_task_finished(task_id):
+                print(".", end="", flush=True)
+                sleep(5)
+
+            print("\n \033[92mCompleted\033[39m")
+            return content
+        
+        except Exception as e:
+            ApiSession.__print_request_response(payload, response)
+            raise e
 
     ##############################################################
     # Login
