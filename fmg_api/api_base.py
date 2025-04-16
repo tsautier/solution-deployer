@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # fmg_api/api_base.py                                                        #
-# Solution Deployer, Version 7.6.x b121                                      #
+# Solution Deployer, Version 7.6.x b130                                      #
 # -------------------------------------------------------------------------- #
 # Maintainers: CSE Telco/MSSP EMEA, Fortinet (internal use only)             #
 # -------------------------------------------------------------------------- #
@@ -198,7 +198,7 @@ class ApiSession:
         self._session = content["session"]
 
     ##############################################################
-    # Get Session Coockie
+    # Get Session Cookie
     ##############################################################
     def getSessionCookie(self):
         return self._session
@@ -329,6 +329,24 @@ class ApiSession:
         }
         
         self._run_request_async(payload, name="Add Model Devices")
+
+    ##############################################################
+    # Delete ADOM
+    ##############################################################
+    def deleteAdom(self, adom=None):
+
+        payload = {
+            "session": self._session,
+            "id": 1,
+            "method": "delete",
+            "params": [
+                {
+                    "url": "/dvmdb/adom/" + (adom or self.adom)
+                }
+            ]
+        }
+        
+        self._run_request(payload, name=f"Delete ADOM {adom or self.adom}")  
 
     ##############################################################
     # Delete Devices
