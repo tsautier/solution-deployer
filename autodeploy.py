@@ -73,7 +73,7 @@ def main():
             elif task['type'] == 'onboard':
                 if fail:
                     raise Exception("Skipping the onboarding, because (some of) the previous tasks failed!")
-                onboardDevicesTask(cfg, task)
+                onboardDevicesTask(cfg, task, session)
             success += 1
             print()
             print(f"\033[32m\033[1mTASK {i} SUCCEEDED.\033[0m")

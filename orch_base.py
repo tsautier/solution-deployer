@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
 
 # orch_base.py                                                               #
-# Solution Deployer, Version 7.6.x b120                                      #
+# Solution Deployer, Version 7.6.x b130                                      #
 # -------------------------------------------------------------------------- #
 # Maintainers: CSE Telco/MSSP EMEA, Fortinet (internal use only)             #
 # -------------------------------------------------------------------------- #
 
 import os, glob, csv, jinja2
+from time import sleep
 from pathlib import Path
 from paramiko import SSHClient, AutoAddPolicy, ssh_exception
 from paramiko_expect import SSHClientInteraction
 from yaml import safe_load
 from fmg_api.api_base import ApiSession
+from helpers import print_table
 
 def readConfig(silent=False):
 
@@ -132,20 +134,22 @@ def createModelDevicesTask(session, task, silent=False):
     if 'prerun' in task:
         session.assignCLITemplate(task['prerun'], dev_list)        
 
-def onboardDevicesTask(cfg, task, silent=False):
+def onboardDevicesTask(cfg, task, session=None, silent=False):
     if 'src' in task:
         silent or print(f"Factory-resetting devices from {task['src']}...")
-        silent or print("NOTE: We won't wait until they finish ZTP process, so check it afterwards!")
         with open(task['src'], 'r', encoding='utf-8-sig') as f:
             dev_list = [ d['Name'] for d in csv.DictReader(f) ]
     elif 'site' in task:
         silent or print(f"Factory-resetting device {task['site']}...")
-        silent or print("NOTE: We won't wait until it finishes ZTP process, so check it afterwards!")
         dev_list = [ task['site'] ]
     else:
         silent or print("Factory-resetting all tenant devices...")
-        silent or print("NOTE: We won't wait until it finishes ZTP process, so check it afterwards!")
         dev_list = cfg['sites'].keys()
+
+    lastFMGTask = 0
+    if task.get('monitor', False):
+        silent or print("ZTP Monitoring requested, noting the last FMG Task ID...")
+        lastFMGTask = session.getLastTasks()[0]['id']
         
     fail = 0
     for d in dev_list:
@@ -159,6 +163,21 @@ def onboardDevicesTask(cfg, task, silent=False):
 
     if fail:
         raise Exception("At least some of the devices failed to onboard!")
+    elif task.get('monitor', False):
+        fail, ztp_tasks = __monitorZTP(session, dev_list, lastFMGTask, silent)
+        if fail and task.get('retry', False):
+            silent or print()
+            silent or print("ZTP process has failed for some of the devices.")
+            silent or print("ZTP recovery attempt requested, noting the last FMG Task ID...")
+            failed_dev_list = [ t['dev_name'] for t in ztp_tasks if t['completed'] and not t['success'] ]
+            lastFMGTask = session.getLastTasks()[0]['id']
+            for d in failed_dev_list: 
+                session.resetAutoLink(d)
+            fail, ztp_tasks = __monitorZTP(session, failed_dev_list, lastFMGTask, silent)
+        if fail:
+            raise Exception("ZTP process has failed for some of the devices!")
+    else:
+        silent or print("NOTE: We won't wait until the ZTP process completes, so check it afterwards!")
 
 def runCLICommandTask(cfg, task, silent=False):
     silent or print(f"Running CLI on {task['site']}...")
@@ -281,3 +300,68 @@ def __getNewmanCommand(cfg, session, vars={}, silent=False):
     if session.verbose: command.append('--verbose')
     if silent: command.append('--silent')
     return command      
+
+def __monitorZTP(session, dev_list, min_taskid, silent=False):
+    ztp_status = { d: None for d in dev_list }
+    ztp_tasks, tid_completed = [], []
+    found_tasks, completed, fail, retries = 0, 0, 0, 15
+    lastid = min_taskid
+
+    silent or print("Preparing to start ZTP monitoring...")
+    while retries and completed < len(dev_list):
+        silent or print(f"Waiting... (retries left: {retries})")
+        sleep(40)
+
+        # Look for new ZTP tasks
+        if found_tasks < len(dev_list):
+            new_tasks = session.getLastTasks()
+            maxid = new_tasks[0]['id']
+            if maxid > lastid:
+                if maxid > lastid + 1:
+                    # More than one new task detected, get them all
+                    new_tasks = session.getLastTasks(
+                        count = maxid - lastid
+                    )
+                ztp_tasks.extend(
+                    [ t['id'] for t in new_tasks if t['title'] == 'autolinktitle' ]
+                )
+                lastid = maxid
+
+        # Check ZTP tasks status
+        for tid in ztp_tasks:
+            task = session.getTask(tid, detailed=True)
+
+            if not ztp_status[task['dev_name']]:
+                # New ZTP task found
+                found_tasks += 1
+            ztp_status[task['dev_name']] = task
+
+            if task['completed']:
+                completed += 1
+                tid_completed.append(tid)
+                if not task['success']: fail += 1
+        
+        # Stop monitoring completed ZTP tasks
+        ztp_tasks = [ tid for tid in ztp_tasks if tid not in tid_completed ]
+        
+        silent or print()
+        silent or print_table(
+            ztp_status,
+            columns={
+                'Completed': 'completed',
+                'Success': 'success',
+                'Last Message': "message"
+            },
+            keyColumn="Device",
+            title="Current ZTP Status" 
+        )
+        retries -= 1
+        silent or print(f"SUMMARY: {found_tasks} ZTP TaskIDs Found, \033[32m\033[1m{completed} Completed\033[0m, \033[91m\033[1m{fail} Failed\033[0m.")
+        silent or print()
+
+    if completed < len(dev_list):
+        raise Exception("ZTP process did not complete for some of the devices!")
+
+    return fail, ztp_status.values()
+
+

@@ -173,8 +173,9 @@ class ApiSession:
             raise e
 
     ##############################################################
-    # Login
+    # API Session Management
     ##############################################################
+
     def login(self, user, password):
 
         payload = {
@@ -197,15 +198,9 @@ class ApiSession:
         content = self._run_request(payload, "Login")
         self._session = content["session"]
 
-    ##############################################################
-    # Get Session Cookie
-    ##############################################################
     def getSessionCookie(self):
         return self._session
 
-    ##############################################################
-    # Logout
-    ##############################################################
     def logout(self):
 
         payload = {
@@ -222,9 +217,6 @@ class ApiSession:
         content = self._run_request(payload, "Logout")
         self._session = None
 
-    ##############################################################
-    # Get Serial Number
-    ##############################################################
     def getSerialNumber(self):
 
         payload = {
@@ -242,8 +234,9 @@ class ApiSession:
         return content['result'][0]['data']['Serial Number']
 
     ##############################################################
-    # Add CLI Template
+    # CLI Template Management
     ##############################################################
+
     def addCLITemplate(self, template_name, content, type='cli', prerun=False):
 
         payload = {
@@ -267,9 +260,6 @@ class ApiSession:
 
         self._run_request(payload, name=f"Add CLI Template ({template_name})")
 
-    ##############################################################
-    # Assign CLI Template
-    ##############################################################
     def assignCLITemplate(self, template_name, dev_list):
 
         scope_dev_list = []
@@ -294,8 +284,28 @@ class ApiSession:
         self._run_request(payload, name=f"Assign CLI Template ({template_name})")
 
     ##############################################################
-    # Add Model Devices
+    # ADOM Management
     ##############################################################
+
+    def deleteAdom(self, adom=None):
+
+        payload = {
+            "session": self._session,
+            "id": 1,
+            "method": "delete",
+            "params": [
+                {
+                    "url": "/dvmdb/adom/" + (adom or self.adom)
+                }
+            ]
+        }
+        
+        self._run_request(payload, name=f"Delete ADOM {adom or self.adom}")  
+
+    ##############################################################
+    # Device Management
+    ##############################################################
+
     def addModelDevices(self, dev_list):
 
         add_dev_list = []
@@ -330,96 +340,6 @@ class ApiSession:
         
         self._run_request_async(payload, name="Add Model Devices")
 
-    ##############################################################
-    # Delete ADOM
-    ##############################################################
-    def deleteAdom(self, adom=None):
-
-        payload = {
-            "session": self._session,
-            "id": 1,
-            "method": "delete",
-            "params": [
-                {
-                    "url": "/dvmdb/adom/" + (adom or self.adom)
-                }
-            ]
-        }
-        
-        self._run_request(payload, name=f"Delete ADOM {adom or self.adom}")  
-
-    ##############################################################
-    # Delete Devices
-    ##############################################################
-    def deleteDevices(self, dev_list, adom=None):
-
-        if not dev_list: return
-        
-        del_dev_list = []
-        for dev in dev_list:
-            del_dev_list.append({
-                "name": dev['name'],
-                "vdom": "root"
-            })
-        
-        payload = {
-            "session": self._session,
-            "id": 1,
-            "method": "exec",
-            "params": [
-                {
-                    "url": "/dvm/cmd/del/dev-list",
-                    "data": {
-                        "adom": adom or self.adom,
-                        "del-dev-member-list": del_dev_list
-                    }
-                }
-            ]
-        }
-        
-        self._run_request(payload, name=f"Delete Devices from {adom or self.adom}")  
-
-    ##############################################################
-    # Set Variables
-    ##############################################################
-    def setVariables(self, vars):
-
-        var_list = []
-        for var, map in vars.items():
-            map_list = []
-            for dev, val in map.items():
-                map_list.append({
-                    "_scope": [
-                        {
-                            "name": dev,
-                            "vdom": "global"
-                        }
-                    ],
-                    "value": val
-                })
-            var_list.append({
-                "name": var,
-                "dynamic_mapping": map_list
-            })
-
-        payload = {
-            "session": self._session,
-            "id": 1,
-            "method": "set",
-            "params": [
-                {
-                    "url": "/pm/config/adom/" + self.adom + "/obj/fmg/variable",
-                    "data": var_list
-                }
-            ]
-        }
-        
-        self._run_request(payload, name="Set Variables")        
-
-    ##############################################################
-    # Get Devices
-    ##############################################################
-
     def getDevices(self, adom=None):
 
         payload = {
@@ -450,10 +370,6 @@ class ApiSession:
             )
 
         return dev_list
-
-    ##############################################################
-    # Get Device
-    ##############################################################
 
     def getDevice(self, dev_name, adom=None):
 
@@ -488,3 +404,130 @@ class ApiSession:
             }
         else:
             return False
+
+    def deleteDevices(self, dev_list, adom=None):
+
+        if not dev_list: return
+        
+        del_dev_list = []
+        for dev in dev_list:
+            del_dev_list.append({
+                "name": dev['name'],
+                "vdom": "root"
+            })
+        
+        payload = {
+            "session": self._session,
+            "id": 1,
+            "method": "exec",
+            "params": [
+                {
+                    "url": "/dvm/cmd/del/dev-list",
+                    "data": {
+                        "adom": adom or self.adom,
+                        "del-dev-member-list": del_dev_list
+                    }
+                }
+            ]
+        }
+        
+        self._run_request(payload, name=f"Delete Devices from {adom or self.adom}")  
+
+    def setVariables(self, vars):
+
+        var_list = []
+        for var, map in vars.items():
+            map_list = []
+            for dev, val in map.items():
+                map_list.append({
+                    "_scope": [
+                        {
+                            "name": dev,
+                            "vdom": "global"
+                        }
+                    ],
+                    "value": val
+                })
+            var_list.append({
+                "name": var,
+                "dynamic_mapping": map_list
+            })
+
+        payload = {
+            "session": self._session,
+            "id": 1,
+            "method": "set",
+            "params": [
+                {
+                    "url": "/pm/config/adom/" + self.adom + "/obj/fmg/variable",
+                    "data": var_list
+                }
+            ]
+        }
+        
+        self._run_request(payload, name="Set Variables")  
+
+    def resetAutoLink(self, dev_name, adom=None):
+        pass
+
+    ##############################################################
+    # Task Management
+    ##############################################################        
+
+    @staticmethod
+    def __parse_task(task):
+        return {
+            'id': int(task['id']),
+            'title': task['title'],
+            'success': task['state'] == 4,
+            'completed': task['percent'] == 100,
+            'dev_name': task['line'][0]['name'] if 'line' in task else '',
+            'message': task['line'][0]['detail'] if 'line' in task else ''            
+        }
+
+    def getLastTasks(self, count=1, detailed=False):
+
+        payload = {
+            "session": self._session,
+            "id": 1,
+            "method": "get",
+            "params": [
+                {
+                    "url": "/task/task",
+                    "range": [
+                        0,
+                        count
+                    ],
+                    "sortings": [
+                        {
+                            "id": -1
+                        }
+                    ],
+                    "loadsub": int(detailed)
+                }
+            ]
+        }
+        
+        content = self._run_request(payload, name=f"Get Last Tasks (count = {count})") 
+        tasks = []
+        for t in content['result'][0]['data']:
+            tasks.append(ApiSession.__parse_task(t))
+
+        return tasks
+
+    def getTask(self, id, detailed=False):
+
+        payload = {
+            "session": self._session,
+            "id": 1,
+            "method": "get",
+            "params": [
+                {
+                    "url": "/task/task/" + str(id),
+                    "loadsub": int(detailed)
+                }
+            ]
+        }
+        
+        content = self._run_request(payload, name=f"Get Task {id}")
+        return ApiSession.__parse_task(content['result'][0]['data'])
