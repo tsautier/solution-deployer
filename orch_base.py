@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # orch_base.py                                                               #
-# Solution Deployer, Version 7.6.x b130                                      #
+# Solution Deployer, Version 7.6.x b140                                      #
 # -------------------------------------------------------------------------- #
 # Maintainers: CSE Telco/MSSP EMEA, Fortinet (internal use only)             #
 # -------------------------------------------------------------------------- #
@@ -79,7 +79,7 @@ def setNewPassword(client, fgt, cfg, silent=False):
         username = cfg['fgt_user'],
         password = ""
     )            
-    interact = SSHClientInteraction(client, display=True)
+    interact = SSHClientInteraction(client, display=(not silent))
     silent or print('>')
     interact.expect('New Password: ')
     interact.send(cfg['fgt_password'])
@@ -281,7 +281,7 @@ def __factoryResetDevice(client, fgt, cfg, args=None, silent=False):
         username = cfg['fgt_user'],
         password = cfg['fgt_password']
     )
-    interact = SSHClientInteraction(client, display=True)
+    interact = SSHClientInteraction(client, display=(not silent))
     silent or print('>')
     interact.expect('.*# ')
     interact.send('execute factoryreset2 keepvmlicense')
