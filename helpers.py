@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-# helpers.py                                                               #
-# Solution Deployer, Version 7.6.x b130                                      #
+# helpers.py                                                                 #
+# Solution Deployer, Version 7.6.x b140                                      #
 # -------------------------------------------------------------------------- #
 # Maintainers: CSE Telco/MSSP EMEA, Fortinet (internal use only)             #
 # -------------------------------------------------------------------------- #
