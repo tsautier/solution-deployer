@@ -15,21 +15,46 @@ from yaml import safe_load
 from fmg_api.api_base import ApiSession
 from helpers import print_table
 
-def readConfig(silent=False):
+def readConfig(shared=False, silent=False) -> dict:
+    """Reads config.yaml
 
-    tenant = os.environ.get("ORCH_TENANT") or \
-        (Path('.orch_tenant').read_text().strip() if Path('.orch_tenant').exists() else "")
+    Args:
+        shared (bool, optional): 
+            Use False to read the current tenant config (as specified by env.var ORCH_TENANT or .orch_tenant file). 
+            Use True to read the shared config. Defaults to False.
+        silent (bool, optional): Suppress outputs. Defaults to False.
 
-    silent or print("========================")
-    silent or print(" Tenant: " + tenant)
-    silent or print("========================")
+    Returns:
+        dict: config dictionary
+    """
+    if not shared:
+        tenant = os.environ.get("ORCH_TENANT") or \
+            (Path('.orch_tenant').read_text().strip() if Path('.orch_tenant').exists() else "")
+
+        silent or print("========================")
+        silent or print(" Tenant: " + tenant)
+        silent or print("========================")
+    else:
+        # Read shared configs
+        tenant = 'shared'
+
     tenantdir = "tenants/" + tenant
 
     with open(tenantdir + '/config.yaml', 'r') as cfgfile:
         cfg = safe_load(cfgfile)
 
-    silent or print("FMG Host = " + cfg['fmg_host'])
-    silent or print("ADOM = " + cfg['fmg_adom'])
+    # Optional locally stored secrets (tenant file overrides shared file)
+    secrets = tenantdir + '/.secrets.yaml'
+    if not shared and not Path(secrets).exists():
+        # Tenant file doesn't exist, try shared file
+        secrets = "tenants/shared/.secrets.yaml"
+    if Path(secrets).exists():
+        with open(secrets, 'r') as secrets_file:
+            cfg = cfg | safe_load(secrets_file)
+
+    if not shared:
+        silent or print("FMG Host = " + cfg['fmg_host'])
+        silent or print("ADOM = " + cfg['fmg_adom'])
 
     cfg['tenant'] = tenant
     cfg['tenantdir'] = tenantdir
