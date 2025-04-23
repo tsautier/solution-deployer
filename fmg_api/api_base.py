@@ -29,47 +29,6 @@ class ApiSession:
         self.verbose = False
         self.logout()
 
-    def __is_task_finished(self, id):
-
-        payload = {
-            "session": self._session,
-            "id": 1,
-            "method": "get",
-            "params": [
-                {
-                    "url": "/task/task/" + str(id)
-                }
-            ]
-        }
-
-        headers = {
-            'Content-Type': "application/json",
-            'cache-control': "no-cache"
-        }
-
-        response = requests.request("POST", self.url, data=json.dumps(
-            payload), headers=headers, timeout=30, verify=False)
-
-        if not self.__is_request_status_ok(response):
-            print(" \033[31Error in request.\033[39m")
-            print(response.text)
-            raise Exception(response.text)
-
-        try:
-            content = json.loads(response.content)
-            line = content["result"][0]["data"]["line"]
-
-            for l in line:
-                if l["percent"] != 100:
-                    return False
-        except:
-            content = json.loads(response.content)
-            if content["result"][0]["data"]["percent"] != 100:
-                return False
-
-        return True
-
-
     @staticmethod
     def __is_request_status_ok(response):
         content = json.loads(response.content)
@@ -99,8 +58,8 @@ class ApiSession:
             print("\033[0m")
 
 
-    def _run_request(self, payload, name=""):
-        print("Running request \033[33m" + str(self.__request_number) +
+    def _run_request(self, payload, name="", silent=False):
+        silent or print("Running request \033[33m" + str(self.__request_number) +
               "\033[39m. \033[93m" + name + "\033[39m")
         self.__request_number += 1
 
@@ -115,24 +74,24 @@ class ApiSession:
                 payload), headers=headers, timeout=30, verify=False)
 
             if not ApiSession.__is_request_status_ok(response):
-                print(" \033[91mError in request.\033[0m")
+                silent or print(" \033[91mError in request.\033[0m")
                 raise Exception(response.text)
 
             content = json.loads(response.content)
 
             if self.verbose: 
-                ApiSession.__print_request_response(payload, response)
+                silent or ApiSession.__print_request_response(payload, response)
 
-            print(" \033[92mCompleted\033[39m")
+            silent or print(" \033[92mCompleted\033[39m")
             return content
        
         except Exception as e:
-            ApiSession.__print_request_response(payload, response)
+            silent or ApiSession.__print_request_response(payload, response)
             raise e
 
 
-    def _run_request_async(self, payload, name=""):
-        print("Running request \033[33m" + str(self.__request_number) +
+    def _run_request_async(self, payload, name="", silent=False):
+        silent or print("Running request \033[33m" + str(self.__request_number) +
               "\033[39m. \033[93m" + name + "\033[39m")
         self.__request_number += 1
 
@@ -147,7 +106,7 @@ class ApiSession:
                 payload), headers=headers, timeout=30, verify=False)
 
             if not ApiSession.__is_request_status_ok(response):
-                print(" \033[91mError in request.\033[0m")
+                silent or print(" \033[91mError in request.\033[0m")
                 raise Exception(response.text)
 
             content = json.loads(response.content)
@@ -157,19 +116,30 @@ class ApiSession:
                 task_id = content["result"][0]["data"]["task"]
 
             if self.verbose: 
-                ApiSession.__print_request_response(payload, response)
+                silent or ApiSession.__print_request_response(payload, response)
 
-            print(" Asynchronous task created: " +
+            silent or print(" Asynchronous task created: " +
                 str(task_id) + " ", end="", flush=False)
-            while not self.__is_task_finished(task_id):
-                print(".", end="", flush=True)
+            
+            retries=30
+            while retries and not (task_status := self.getTask(task_id, silent=True))['completed']:
+                silent or print(".", end="", flush=True)
                 sleep(5)
-
-            print("\n \033[92mCompleted\033[39m")
-            return content
+                retries -= 1
+            
+            if not retries: 
+                silent or print("\n \033[91mAsynchronous task has failed to complete.\033[0m")
+                raise Exception(f"Asynchronous task failed to complete, taskid={task_status['id']}")
+            elif not task_status['success']:
+                task_status = self.getTask(task_id, detailed=True, silent=True)
+                silent or print("\n \033[91mAsynchronous task has completed with error.\033[0m")
+                raise Exception(f"Asynchronous task completed with error: {task_status['message']}")
+            else:
+                silent or print("\n \033[92mCompleted\033[39m")
+                return content
         
         except Exception as e:
-            ApiSession.__print_request_response(payload, response)
+            silent or ApiSession.__print_request_response(payload, response)
             raise e
 
     ##############################################################
@@ -515,7 +485,7 @@ class ApiSession:
 
         return tasks
 
-    def getTask(self, id, detailed=False):
+    def getTask(self, id, detailed=False, silent=False):
 
         payload = {
             "session": self._session,
@@ -529,5 +499,5 @@ class ApiSession:
             ]
         }
         
-        content = self._run_request(payload, name=f"Get Task {id}")
+        content = self._run_request(payload, name=f"Get Task {id}", silent=silent)
         return ApiSession.__parse_task(content['result'][0]['data'])
