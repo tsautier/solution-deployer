@@ -193,13 +193,22 @@ execute factoryreset2 keepvmlicense
 
 Supported arguments:
 
-| Argument | Values      | Description                | Required | Default |
-|----------|-------------|----------------------------|----------|---------|
-| `src`    | filename(s) | Inventory CSV file         | no       | -       |
-| `site`   | string      | Device name to trigger ZTP | no       | -       |
+| Argument  | Values      | Description                | Required | Default |
+|-----------|-------------|----------------------------|----------|---------|
+| `src`     | filename(s) | Inventory CSV file         | no       | -       |
+| `site`    | string      | Device name to trigger ZTP | no       | -       |
+| `monitor` | boolean     | Monitor ZTP process        | no       | false   |
+| `retry`   | boolean     | Attempt ZTP retry          | no       | false   |
 
 The task logic is as follows:
 
 - If an inventory file is specified (`src` argument), we will factory-reset all the devices in that file
 - Else if a specific device is specified (`site` argument), we will factory-reset only that device
 - Else if none of the arguments is specified, we will factory-reset all the tenant devices defined in the `config.yaml`
+
+If ZTP monitoring is not requested (`monitor` argument), the task finishes immediately after the factory-reset. 
+Otherwise, it will wait, periodically retrieving FMG tasks, looking for the Auto-Link tasks. When found, we will keep polling them, 
+until they finish. We will print ZTP status for all the devices during this process, until it finishes. 
+
+If one or more devices fail the Auto-Link process, we can attempt to reset the Auto-Link flag for the failed devices (`retry` argument), 
+which should trigger another ZTP attempt. We will then monitor this attempt. We will not retry more than once. 

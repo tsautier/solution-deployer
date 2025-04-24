@@ -16,7 +16,8 @@ from fmg_api.api_base import ApiSession
 from helpers import print_table
 
 def readConfig(shared=False, silent=False) -> dict:
-    """Reads config.yaml
+    """
+    Read config.yaml
 
     Args:
         shared (bool, optional): 
@@ -27,6 +28,7 @@ def readConfig(shared=False, silent=False) -> dict:
     Returns:
         dict: config dictionary
     """
+    
     if not shared:
         tenant = os.environ.get("ORCH_TENANT") or \
             (Path('.orch_tenant').read_text().strip() if Path('.orch_tenant').exists() else "")
@@ -61,7 +63,17 @@ def readConfig(shared=False, silent=False) -> dict:
 
     return cfg
 
-def getApiSession(cfg, silent=False):
+def getApiSession(cfg: dict, silent=False) -> ApiSession:
+    """
+    Establish API session to the FMG.
+
+    Args:
+        cfg (dict): tenant config
+        silent (bool, optional): Suppress outputs. Defaults to False.
+
+    Returns:
+        ApiSession: API session
+    """
     silent or print("Connecting to FMG...")
     session = ApiSession(
         url = 'https://' + cfg['fmg_host'] + '/jsonrpc',
@@ -193,7 +205,7 @@ def onboardDevicesTask(cfg, task, session=None, silent=False):
         if fail and task.get('retry', False):
             silent or print()
             silent or print("ZTP process has failed for some of the devices.")
-            silent or print("ZTP recovery attempt requested, noting the last FMG Task ID...")
+            silent or print("ZTP retry requested, noting the last FMG Task ID...")
             failed_dev_list = [ t['dev_name'] for t in ztp_tasks if t['completed'] and not t['success'] ]
             lastFMGTask = session.getLastTasks()[0]['id']
             for d in failed_dev_list: 

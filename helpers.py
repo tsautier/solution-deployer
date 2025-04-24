@@ -16,6 +16,7 @@ def print_table(data, columns=None, keyColumn="", title=None):
         keyColumn (str, optional): The title of the leftmost column
         title (str, optional): Title for the table
     """
+    
     if not data:
         return
     
