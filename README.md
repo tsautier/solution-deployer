@@ -178,7 +178,7 @@ Supported arguments:
 | Argument | Values      | Description                    | Required | Default                      |
 |----------|-------------|--------------------------------|----------|------------------------------|
 | `src`    | filename(s) | Inventory CSV file             | yes      | -                            |
-| `prerun` | boolean     | Pre-run CLI Template to assign | no       | 'provision_interfaces_on_vm' |
+| `prerun` | string      | Pre-run CLI Template to assign | no       | -                            |
 
 
 ### `type: onboard`

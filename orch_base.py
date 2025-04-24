@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # orch_base.py                                                               #
-# Solution Deployer, Version 7.6.x b140                                      #
+# Solution Deployer, Version 7.6.x                                           #
 # -------------------------------------------------------------------------- #
 # Maintainers: CSE Telco/MSSP EMEA, Fortinet (internal use only)             #
 # -------------------------------------------------------------------------- #
@@ -16,19 +16,17 @@ from fmg_api.api_base import ApiSession
 from helpers import print_table
 
 def readConfig(shared=False, silent=False) -> dict:
-    """
-    Read config.yaml
+    """Read config.yaml
 
     Args:
         shared (bool, optional): 
             Use False to read the current tenant config (as specified by env.var ORCH_TENANT or .orch_tenant file). 
-            Use True to read the shared config. Defaults to False.
-        silent (bool, optional): Suppress outputs. Defaults to False.
+            Use True to read the shared config
+        silent (bool, optional): Suppress outputs
 
     Returns:
-        dict: config dictionary
+        dict: tenant config 
     """
-    
     if not shared:
         tenant = os.environ.get("ORCH_TENANT") or \
             (Path('.orch_tenant').read_text().strip() if Path('.orch_tenant').exists() else "")
@@ -63,17 +61,10 @@ def readConfig(shared=False, silent=False) -> dict:
 
     return cfg
 
+
 def getApiSession(cfg: dict, silent=False) -> ApiSession:
-    """
-    Establish API session to the FMG.
+    """Establish API session to the FMG."""
 
-    Args:
-        cfg (dict): tenant config
-        silent (bool, optional): Suppress outputs. Defaults to False.
-
-    Returns:
-        ApiSession: API session
-    """
     silent or print("Connecting to FMG...")
     session = ApiSession(
         url = 'https://' + cfg['fmg_host'] + '/jsonrpc',
@@ -83,7 +74,16 @@ def getApiSession(cfg: dict, silent=False) -> ApiSession:
     )
     return session
 
-def setNewPassword(client, fgt, cfg, silent=False):
+
+def setNewPassword(client: SSHClient, fgt: dict, cfg: dict, silent=False):
+    """Reset FGT password when forced.
+
+    Args: 
+        fgt: { 
+            'ip' (str): IP address or host,
+            'port' (int, optional): SSH port, default = 22
+        }
+    """
     silent or print(f"Connecting to {fgt['ip']} with {cfg['fgt_user']} and trying to set the new password to {cfg['fgt_password']}")
     client.connect(
         fgt['ip'],
@@ -101,7 +101,9 @@ def setNewPassword(client, fgt, cfg, silent=False):
     silent or print('<')       
     silent or print("The new password has been set successfully!")  
 
-def getSystemStatus(output):
+
+def getSystemStatus(output: list[str]) -> dict:
+    """Parse 'get system status' output and return it as a dict"""
     dict = {}
     for str in [ s for s in output if ':' in s ]:
         k,v = str.split(':', 1)
@@ -109,11 +111,24 @@ def getSystemStatus(output):
         dict[k.strip()] = v.strip()
     return dict
 
+
 ###################
 # Deployment Tasks
 ###################
 
-def runPostmanTask(cfg, session, task, silent=False):
+def runPostmanTask(cfg: dict, session: ApiSession, task: dict, silent=False):
+    """Run a folder (one or more API calls) in Postman collection
+
+    Args:
+
+        task: {
+            'folder' (str): API call or folder name to run, 
+            'vars' (str): YAML file with variables (filename)
+        }
+
+    Raises:
+        Exception: on error
+    """
     silent or print(f"Running Postman collection - {task['folder']}...")
     vars = {}
     if 'vars' in task:
@@ -124,7 +139,19 @@ def runPostmanTask(cfg, session, task, silent=False):
     if os.system(' '.join(command)): 
         raise Exception("Postman run ended with error(s)!")
 
-def importCLITemplateTask(session, task, silent=False):
+
+def importCLITemplateTask(session: ApiSession, task: dict, silent=False):
+    """Import CLI Template files into FMG. 
+
+    Args:
+
+        task: {
+            'src' (str): template files (shell wildcards supported) 
+            'rename' (str, optional): target name on FMG (by default: leave original name)
+            'syntax' (str, optional): CLI template type, default = 'jinja'
+            'prerun' (bool, optional): True for Pre-run CLI template, default = False
+        }
+    """
     silent or print(f"Importing CLI Templates from {task['src']}...")
     for t in glob.glob(task['src']):
         with open(t, 'r') as f:
@@ -135,14 +162,33 @@ def importCLITemplateTask(session, task, silent=False):
                 prerun = task.get('prerun', False)
             )
 
-def deleteDevicesTask(session, task, silent=False):
+
+def deleteDevicesTask(session: ApiSession, task: dict, silent=False):
+    """Delete devices from FMG.
+
+    Args:
+
+        task: { 
+            'adom' (str): ADOM to delete all devices from
+        }
+    """
     silent or print(f"Deleting Devices from {task['adom']}...")
     session.deleteDevices(
         session.getDevices(adom=task['adom']),
         adom=task['adom']
     )
 
-def createModelDevicesTask(session, task, silent=False):
+
+def createModelDevicesTask(session: ApiSession, task: dict, silent=False):
+    """Create Model Devices on FMG.
+
+    Args:
+
+        task: {
+            'src' (str): inventory CSV file
+            'prerun' (str, optional): name of Pre-Run CLI Template to assign
+        }
+    """
     silent or print(f"Creating Model Devices from {task['src']}...")
     dev_list, vars = [], {}
     with open(task['src'], 'r', encoding='utf-8-sig') as f:
@@ -171,7 +217,23 @@ def createModelDevicesTask(session, task, silent=False):
     if 'prerun' in task:
         session.assignCLITemplate(task['prerun'], dev_list)        
 
-def onboardDevicesTask(cfg, task, session=None, silent=False):
+
+def onboardDevicesTask(cfg: dict, task: dict, session: ApiSession=None, silent=False):
+    """Onboard devices (trigger ZTP by factory-reset).
+
+    - If an inventory file is specified, factory-reset all the devices in that file
+    - Else if a specific device is specified, factory-reset only that device
+    - Else factory-reset all the devices in the tenant config
+
+    Args:
+
+        task: {
+            'src' (str, optional): inventory CSV file (factory-reset all devices in it)
+            'site' (str, optional): device name (factory-reset only this device)
+            'monitor' (bool, optional): wait until ZTP is finished and check results, default = False
+            'retry' (bool, optional): one retry if ZTP failed for some devices, default = False
+        }
+    """
     if 'src' in task:
         silent or print(f"Factory-resetting devices from {task['src']}...")
         with open(task['src'], 'r', encoding='utf-8-sig') as f:
@@ -216,7 +278,20 @@ def onboardDevicesTask(cfg, task, session=None, silent=False):
     else:
         silent or print("NOTE: We won't wait until the ZTP process completes, so check it afterwards!")
 
-def runCLICommandTask(cfg, task, silent=False):
+
+def runCLICommandTask(cfg: dict, task: dict, silent=False) -> list[str]:
+    """Run CLI command on FGT and return the output
+
+    Args:
+
+        task: { 
+            'site' (str): device name,
+            'cli' (str): CLI command to run
+        }
+
+    Returns: 
+        list[str]: CLI output (list of lines)
+    """
     silent or print(f"Running CLI on {task['site']}...")
     silent or print(f"CLI: {task['cli']}")
     output = __runOnDevice(
@@ -230,7 +305,23 @@ def runCLICommandTask(cfg, task, silent=False):
         raise Exception("Failed to run CLI!")
     return output
 
-def applyCLIConfigTask(cfg, task, silent=False):
+
+def applyCLIConfigTask(cfg: dict, task: dict, silent=False):
+    """Render CLI from Jinja templates and apply it to one or more FGTs
+
+    - If specific device and specific template are specified, apply this template on this device
+    - If no specific device is specified, derive device name from the template name; 
+      when a path to multiple templates is specified, apply each template on respective device
+
+    Args:
+
+        task: {
+            'site' (str, optional): specific device to apply CLI to
+            'src' (str): path to Jinja template(s) with CLI
+            'var' (dict, optional): variables for Jinja rendering
+        }
+
+    """
     todo = {}
     if 'site' in task and len(glob.glob(task['src'])) == 1:
         silent or print(f"Running CLI from {task['src']} on {task['site']}...")
@@ -261,11 +352,25 @@ def applyCLIConfigTask(cfg, task, silent=False):
     if fail:
         raise Exception("Failed to apply CLI config to at least some of the devices!")
 
+
 ###################
 # Helper Functions
 ###################
 
-def __runOnDevice(fgt, action, cfg, action_args=None, silent=False):
+def __runOnDevice(fgt: dict, action, cfg: dict, action_args=None, silent=False) -> any:
+    """Connect to FGT using SSH and execute a given action function on it.
+
+    Args:
+        fgt: { 
+            'ip' (str): IP address or host,
+            'port' (int, optional): SSH port, default = 22
+        }
+        action (func): action function
+        action_args (list, optional): action arguments
+
+    Returns:
+        Action output 
+    """
     output = None
     client = SSHClient()
     client.set_missing_host_key_policy(AutoAddPolicy())
@@ -285,7 +390,20 @@ def __runOnDevice(fgt, action, cfg, action_args=None, silent=False):
 
     return output
 
-def __factoryResetDevice(client, fgt, cfg, args=None, silent=False):
+
+def __factoryResetDevice(client:SSHClient, fgt: dict, cfg: dict, args=None, silent=False) -> bool:
+    """Action function to factory-reset FGT (to be used with __runOnDevice())
+
+    Args:
+        fgt: { 
+            'ip' (str): IP address or host,
+            'port' (int, optional): SSH port, default = 22
+        },
+        args (None): unused
+
+    Returns:
+        bool: True on success
+    """
     silent or print(f"Connecting to {fgt['ip']} with {cfg['fgt_user']} / {cfg['fgt_password']}")
     client.connect(
         fgt['ip'],
@@ -303,7 +421,20 @@ def __factoryResetDevice(client, fgt, cfg, args=None, silent=False):
     silent or print('<')
     return True
 
-def __applyCLIConfig(client, fgt, cfg, cli_config, silent=False):
+
+def __applyCLIConfig(client: SSHClient, fgt, cfg, cli_config, silent=False):
+    """Action function to execute CLI on FGT (to be used with __runOnDevice())
+
+    Args:
+        fgt: { 
+            'ip' (str): IP address or host,
+            'port' (int, optional): SSH port, default = 22
+        },
+        cli_config (str): CLI commands
+
+    Returns:
+        list[str]: CLI output (list of lines)
+    """
     silent or print(f"Connecting to {fgt['ip']} with {cfg['fgt_user']} / {cfg['fgt_password']}")
     client.connect(
         fgt['ip'],
@@ -323,7 +454,13 @@ def __applyCLIConfig(client, fgt, cfg, cli_config, silent=False):
 
     return output    
 
-def __getNewmanCommand(cfg, session, vars={}, silent=False):
+
+def __getNewmanCommand(cfg: dict, session: ApiSession, vars={}, silent=False) -> list[str]:
+    """Build newman command-line
+
+    Args:
+        vars (dict, optional): additional environment variables
+    """
     command = []
     command.append('newman run')
     command.append('"' + cfg['postman_collection'] + '"')
@@ -338,7 +475,29 @@ def __getNewmanCommand(cfg, session, vars={}, silent=False):
     if silent: command.append('--silent')
     return command      
 
-def __monitorZTP(session, dev_list, min_taskid, silent=False):
+
+def __monitorZTP(session: ApiSession, dev_list: list[str], min_taskid: int, silent=False) -> tuple[int, dict]:
+    """Monitor FMG Auto-Link tasks during ZTP.
+
+    Args:
+        dev_list (list[str]): list of device names
+        min_taskid (int): last FMG task_id before start (min. task_id to look for)
+
+    Raises:
+        Exception: on failure of one or more devices (with error message)
+
+    Returns:
+        tuple[int, dict]: 
+            int: number of failed devices
+            dict: {
+                'id' (int): task id,
+                'title' (str): task title,
+                'success' (bool): successful (True/False)
+                'completed' (bool): completed (True/False)
+                'dev_name' (str): device name
+                'message' (str): last message
+            }
+    """
     ztp_status = { d: None for d in dev_list }
     ztp_tasks, tid_completed = [], []
     found_tasks, completed, fail, retries = 0, 0, 0, 15
