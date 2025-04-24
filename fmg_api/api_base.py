@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # fmg_api/api_base.py                                                        #
-# Solution Deployer, Version 7.6.x b140                                      #
+# Solution Deployer, Version 7.6.x b141                                      #
 # -------------------------------------------------------------------------- #
 # Maintainers: CSE Telco/MSSP EMEA, Fortinet (internal use only)             #
 # -------------------------------------------------------------------------- #
@@ -437,8 +437,25 @@ class ApiSession:
         
         self._run_request(payload, name="Set Variables")  
 
-    def resetAutoLink(self, dev_name, adom=None):
-        pass
+    def resetAutoLink(self, dev_name):
+
+        payload = {
+            "session": self._session,
+            "id": 1,
+            "method": "exec",
+            "params": [
+                {
+                    "url": "/cli/global/exec/fgfm/reclaim-dev-tunnel/" + dev_name,
+                    "data": {
+                        "flags": [
+                            "force"
+                        ]
+                    }                    
+                }
+            ]
+        }
+        
+        self._run_request(payload, name=f"Reset Auto-Link for {dev_name}")  
 
     ##############################################################
     # Task Management
