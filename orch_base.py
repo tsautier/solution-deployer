@@ -450,7 +450,7 @@ def __applyCLIConfig(client: SSHClient, fgt, cfg, cli_config, silent=False):
         line = stdout.readline()
         if not line: break
         # Handle '\r' for long outputs with "--More--"
-        output.append(line[line.rfind('\r')+1:])
+        output.append(line[line.strip().rfind('\r')+1:])
 
     return output    
 
