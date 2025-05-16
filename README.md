@@ -116,7 +116,7 @@ Each task has the following parameters:
 
 - `name` - the name of the tasks (for display purposes mainly)
 - `type` - one of the supported types (see below)
-- `tag` - a tag to include/exclude tasks from the run (optional)
+- `tag` - a tag or a list of comma-delimited tags to include/exclude tasks from the run (optional)
 - Additional arguments (zero or more), as defined by the task type
 
 Let's list all the supported task types and describe the arguments for each one of them.
