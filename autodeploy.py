@@ -9,7 +9,7 @@
 import argparse
 from orch_base import *
 
-DEPLOYER_VER = "7.6.x b145"
+DEPLOYER_VER = "7.6.x b150"
 
 def main():
 
@@ -34,6 +34,11 @@ def main():
         default=cfg.get('default_skip_tags', None)
     )
     parser.add_argument(
+        '--tasks', metavar="NAME1,NAME2,...",
+        help='specific tasks to execute (by name, comma-delimited)',
+        type=lambda s: [t for t in s.split(',')]
+    )
+    parser.add_argument(
         '--verbose', 
         action='store_true',
         help='more verbose output'
@@ -56,8 +61,17 @@ def main():
         print(f"TASK {i}: {task['name']}")
         print("---------------------------------------------------")
 
-        if (args.tags and task.get('tag', '') not in args.tags) or \
-           (args.skip_tags and not args.tags and task.get('tag', '') in args.skip_tags):
+        # Running specific tasks (by name)
+        if args.tasks and task['name'] not in args.tasks:
+            print("\033[35mSKIPPED by name\033[0m")
+            continue            
+        
+        # One or more tags (comma-delimited)
+        task_tags = task.get('tag', '').split(',')
+        if args.tags and args.skip_tags:
+            args.skip_tags = [ t for t in args.skip_tags if t not in args.tags ]
+        if (args.tags and not any(tag in args.tags for tag in task_tags)) or \
+           (args.skip_tags and any(tag in args.skip_tags for tag in task_tags)):
             print("\033[35mSKIPPED by tag\033[0m")
             continue
 
