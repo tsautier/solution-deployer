@@ -9,7 +9,7 @@
 import argparse
 from orch_base import *
 
-DEPLOYER_VER = "7.6.x b150"
+DEPLOYER_VER = "7.6.x b158"
 
 def main():
 
@@ -39,6 +39,11 @@ def main():
         type=lambda s: [t for t in s.split(',')]
     )
     parser.add_argument(
+        '--dry',
+        action='store_true',
+        help='dry run (test tags)'
+    )
+    parser.add_argument(
         '--verbose', 
         action='store_true',
         help='more verbose output'
@@ -46,6 +51,7 @@ def main():
     args = parser.parse_args()
    
     print()
+    if args.dry: print("Dry-run mode ON.")
     if args.verbose: 
         print("Verbose mode ON.")
         session.verbose = True
@@ -74,6 +80,8 @@ def main():
            (args.skip_tags and any(tag in args.skip_tags for tag in task_tags)):
             print("\033[35mSKIPPED by tag\033[0m")
             continue
+
+        if args.dry: continue
 
         try:
             if task['type'] == 'postman':
