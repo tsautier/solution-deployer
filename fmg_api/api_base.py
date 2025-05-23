@@ -421,6 +421,56 @@ class ApiSession:
         self._run_request(payload, name="Set Variables")  
 
 
+    def reinstallPolicy(self, dev_name: str):
+        """Reinstall assigned Policy Package on requested device."""
+
+        # Get assigned Policy Package name
+        payload = {
+            "session": self._session,
+            "id": 1,
+            "method": "get",
+            "params": [
+                {
+                    "url": "/dvmdb/device/" + dev_name,
+                    "option": [
+                        "extra info",
+                        "assignment info"
+                    ]      
+                }
+            ]
+        }        
+        content = self._run_request(payload, name=f"Get Policy Package for {dev_name}") 
+        for i in content['result'][0]['data']['vdom'][0]['assignment info']:
+            if i['type'] == 'policy': 
+                pkg = i['name']
+
+        # Install Policy
+        payload = {
+            "session": self._session,
+            "id": 1,
+            "method": "exec",
+            "params": [
+                {
+                    "url": "/securityconsole/install/package",
+                    "data": [
+                        {
+                            "adom": self.adom,
+                            "pkg": pkg,
+                            "scope": [
+                                {
+                                    "name": dev_name,
+                                    "vdom": "root"
+                                }
+                            ],
+                            "flags": "none"
+                        }
+                    ]
+                }
+            ]
+        }                         
+        self._run_request_async(payload, name=f"Reinstall Policy {pkg} on {dev_name}")
+
+    
     def resetAutoLink(self, dev_name: str):
         """Reset Auto-Link for requested device (by resetting FGFM tunnel)."""
 

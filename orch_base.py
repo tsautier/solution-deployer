@@ -267,12 +267,7 @@ def onboardDevicesTask(cfg: dict, task: dict, session: ApiSession=None, silent=F
         if fail and task.get('retry', False):
             silent or print()
             silent or print("ZTP process has failed for some of the devices.")
-            silent or print("ZTP retry requested, noting the last FMG Task ID...")
-            failed_dev_list = [ t['dev_name'] for t in ztp_tasks if t['completed'] and not t['success'] ]
-            lastFMGTask = session.getLastTasks()[0]['id']
-            for d in failed_dev_list: 
-                session.resetAutoLink(d)
-            fail, ztp_tasks = __monitorZTP(session, failed_dev_list, lastFMGTask, silent)
+            fail -= __retryZTP(session, ztp_tasks, silent)
         if fail:
             raise Exception("ZTP process has failed for some of the devices!")
     else:
@@ -476,7 +471,7 @@ def __getNewmanCommand(cfg: dict, session: ApiSession, vars={}, silent=False) ->
     return command      
 
 
-def __monitorZTP(session: ApiSession, dev_list: list[str], min_taskid: int, silent=False) -> tuple[int, dict]:
+def __monitorZTP(session: ApiSession, dev_list: list[str], min_taskid: int, silent=False) -> tuple[int, list[dict]]:
     """Monitor FMG Auto-Link tasks during ZTP.
 
     Args:
@@ -487,16 +482,18 @@ def __monitorZTP(session: ApiSession, dev_list: list[str], min_taskid: int, sile
         Exception: on failure of one or more devices (with error message)
 
     Returns:
-        tuple[int, dict]: 
+        tuple[int, list[dict]]: 
             int: number of failed devices
-            dict: {
-                'id' (int): task id,
-                'title' (str): task title,
-                'success' (bool): successful (True/False)
-                'completed' (bool): completed (True/False)
-                'dev_name' (str): device name
-                'message' (str): last message
-            }
+            list[dict]: [
+                {
+                    'id' (int): task id,
+                    'title' (str): task title,
+                    'success' (bool): successful (True/False)
+                    'completed' (bool): completed (True/False)
+                    'dev_name' (str): device name
+                    'message' (str): last message
+                }
+            ]
     """
     ztp_status = { d: None for d in dev_list }
     ztp_tasks, tid_completed = [], []
@@ -561,3 +558,52 @@ def __monitorZTP(session: ApiSession, dev_list: list[str], min_taskid: int, sile
     return fail, ztp_status.values()
 
 
+def __retryZTP(session: ApiSession, ztp_tasks: list[dict], silent=False) -> int:
+    """Retry ZTP if possible.
+
+    - If Install Policy failed, try reinstalling it
+    - If Auto-Link failed, try resetting it
+
+    Args:
+        ztp_tasks (list[dict]): [
+            {
+                'completed' (bool): completed (True/False)
+                'dev_name' (str): device name
+                'message' (str): last message
+            }
+        ]
+
+    Returns:
+        int: number of successfully fixed devices
+    """    
+    fixed = 0
+    silent or print("ZTP retry requested, searching for eligible devices...")
+
+    # Reinstall Policy
+    failed_install = [ 
+        t['dev_name'] 
+        for t in ztp_tasks 
+        if t['completed'] and 'Failed to install config' in t['message'] 
+    ]
+    for d in failed_install:
+        try:
+            session.reinstallPolicy(d)
+            fixed += 1
+        except Exception as e:
+            silent or print(f"\033[91m\033[1mFAILED:\033[0m {e}")                     
+
+    # Retry AutoLink
+    failed_autolink = [
+        t['dev_name'] 
+        for t in ztp_tasks 
+        if t['completed'] and 'devmgmtdatafailed' in t['message'] 
+    ]
+    if failed_autolink:
+        silent or print("Going to retry ZTP, noting the last FMG Task ID...")
+        lastFMGTask = session.getLastTasks()[0]['id']
+        for d in failed_autolink: 
+            session.resetAutoLink(d)
+        retry_fail, ztp_tasks = __monitorZTP(session, failed_autolink, lastFMGTask, silent)
+        fixed += len(failed_autolink) - retry_fail
+   
+    return fixed
