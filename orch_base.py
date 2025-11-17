@@ -7,7 +7,7 @@
 # -------------------------------------------------------------------------- #
 
 import os, glob, csv, jinja2
-from time import sleep
+from time import sleep, time
 from pathlib import Path
 from paramiko import SSHClient, AutoAddPolicy, ssh_exception
 from paramiko_expect import SSHClientInteraction
@@ -430,18 +430,20 @@ def __applyCLIConfig(client: SSHClient, fgt, cfg, cli_config, silent=False):
     Returns:
         list[str]: CLI output (list of lines)
     """
+    timeout = 10
     silent or print(f"Connecting to {fgt['ip']} with {cfg['fgt_user']} / {cfg['fgt_password']}")
     client.connect(
         fgt['ip'],
         port = fgt.get('port', 22),
         username = cfg['fgt_user'],
         password = cfg['fgt_password'],
-        timeout = 10
+        timeout = timeout
     )    
     stdin, stdout, stderr = client.exec_command(cli_config)
 
     output = []
-    while True:
+    start = time()
+    while time() - start < timeout:
         line = stdout.readline()
         if not line: break
         # Handle '\r' for long outputs with "--More--"
