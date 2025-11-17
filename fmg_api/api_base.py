@@ -129,7 +129,7 @@ class ApiSession:
         self._run_request(payload, name=f"Add CLI Template ({template_name})")
 
 
-    def assignCLITemplate(self, template_name: str, dev_list: list[dict]):
+    def assignCLITemplate(self, template_name: str, dev_list: list[dict], adom: str=None):
         """Assign CLI Template to device(s).
 
         Args:
@@ -155,7 +155,7 @@ class ApiSession:
             "method": "add",
             "params": [
                 {
-                    "url": "/pm/config/adom/" + self.adom + "/obj/cli/template/" + template_name + "/scope member",
+                    "url": "/pm/config/adom/" + (adom or self.adom) + "/obj/cli/template/" + template_name + "/scope member",
                     "data": scope_dev_list
                 }
             ]
@@ -189,7 +189,7 @@ class ApiSession:
     # Device Management
     ##############################################################
 
-    def addModelDevices(self, dev_list: dict):
+    def addModelDevices(self, dev_list: dict, adom: str=None):
         """Add a list of Model Devices.
 
         Args:
@@ -228,7 +228,7 @@ class ApiSession:
                 {
                     "url": "/dvm/cmd/add/dev-list",
                     "data": {
-                        "adom": self.adom,
+                        "adom": adom or self.adom,
                         "flags": [ "create_task", "nonblocking" ],
                         "add-dev-list": add_dev_list
                     }
@@ -368,7 +368,7 @@ class ApiSession:
         self._run_request(payload, name=f"Delete Devices from {adom or self.adom}")  
 
 
-    def setVariables(self, vars: dict[str, dict[str,str]]):
+    def setVariables(self, vars: dict[str, dict[str,str]], adom: str=None):
         """Set metadata variables for multiple devices.
 
         Args:
@@ -412,7 +412,7 @@ class ApiSession:
             "method": "set",
             "params": [
                 {
-                    "url": "/pm/config/adom/" + self.adom + "/obj/fmg/variable",
+                    "url": "/pm/config/adom/" + (adom or self.adom) + "/obj/fmg/variable",
                     "data": var_list
                 }
             ]

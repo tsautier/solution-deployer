@@ -187,6 +187,7 @@ def createModelDevicesTask(session: ApiSession, task: dict, silent=False):
         task: {
             'src' (str): inventory CSV file
             'prerun' (str, optional): name of Pre-Run CLI Template to assign
+            'adom' (str, optional): custom ADOM to add devices to
         }
     """
     silent or print(f"Creating Model Devices from {task['src']}...")
@@ -208,14 +209,15 @@ def createModelDevicesTask(session: ApiSession, task: dict, silent=False):
                     vars[k][dev_name] = v
     silent or print(f"Devices: {[dev['name'] for dev in dev_list]}")
     silent or print(f"Variables: {[var for var in vars.keys()]}")
+    silent or print(f"Target ADOM: {task.get('adom', session.adom)}")
     session.deleteDevices(
         session.getDevices('root'),
         adom='root'
     )    
-    session.addModelDevices(dev_list)
-    session.setVariables(vars)
+    session.addModelDevices(dev_list, adom=task.get('adom'))
+    session.setVariables(vars, adom=task.get('adom'))
     if 'prerun' in task:
-        session.assignCLITemplate(task['prerun'], dev_list)        
+        session.assignCLITemplate(task['prerun'], dev_list, adom=task.get('adom'))        
 
 
 def onboardDevicesTask(cfg: dict, task: dict, session: ApiSession=None, silent=False):
