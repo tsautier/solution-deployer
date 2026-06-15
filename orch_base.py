@@ -295,7 +295,7 @@ def runCLICommandTask(cfg: dict, task: dict, silent=False) -> list[str]:
         fgt = cfg['sites'][task['site']],
         action = __applyCLIConfig,
         cfg = cfg,
-        action_args = task['cli'],
+        action_args = { 'cli_config': task['cli'], 'no_more': True },
         silent = silent
     )
     if not output:
@@ -342,7 +342,7 @@ def applyCLIConfigTask(cfg: dict, task: dict, silent=False):
             fgt = cfg['sites'][d],
             action = __applyCLIConfig,
             cfg = cfg,
-            action_args = rendered,
+            action_args = { 'cli_config': rendered, 'no_more': False },
             silent = silent
         ): fail+=1
     
@@ -354,7 +354,7 @@ def applyCLIConfigTask(cfg: dict, task: dict, silent=False):
 # Helper Functions
 ###################
 
-def __runOnDevice(fgt: dict, action, cfg: dict, action_args=None, silent=False) -> any:
+def __runOnDevice(fgt: dict, action, cfg: dict, action_args={}, silent=False) -> any:
     """Connect to FGT using SSH and execute a given action function on it.
 
     Args:
@@ -363,7 +363,7 @@ def __runOnDevice(fgt: dict, action, cfg: dict, action_args=None, silent=False) 
             'port' (int, optional): SSH port, default = 22
         }
         action (func): action function
-        action_args (list, optional): action arguments
+        action_args (dict, optional): action arguments
 
     Returns:
         Action output 
@@ -372,16 +372,16 @@ def __runOnDevice(fgt: dict, action, cfg: dict, action_args=None, silent=False) 
     client = SSHClient()
     client.set_missing_host_key_policy(AutoAddPolicy())
     try:
-        output = action(client, fgt, cfg, action_args, silent)
+        output = action(client, fgt, cfg, **action_args, silent=silent)
     except ssh_exception.AuthenticationException as e:
         silent or print(f"\033[91m\033[1mAuthentication failed,\033[0m trying an empty password (in case it is not set yet)...") 
         try:
             setNewPassword(client, fgt, cfg, silent)
-            output = action(client, fgt, cfg, action_args, silent)
+            output = action(client, fgt, cfg, **action_args, silent=silent)
         except ssh_exception.AuthenticationException as e:
             silent or print(f"\033[91m\033[1mFAILED:\033[0m {e}") 
     except Exception as e:
-        print(f"\033[91m\033[1mFAILED:\033[0m {e}") 
+        print(f"\033[91m\033[1mFAILED:\033[2m {e} \033[0m") 
     finally:
         client.close()
 
@@ -419,7 +419,7 @@ def __factoryResetDevice(client:SSHClient, fgt: dict, cfg: dict, args=None, sile
     return True
 
 
-def __applyCLIConfig(client: SSHClient, fgt, cfg, cli_config, silent=False):
+def __applyCLIConfig(client: SSHClient, fgt, cfg, cli_config, no_more=True, silent=False):
     """Action function to execute CLI on FGT (to be used with __runOnDevice())
 
     Args:
@@ -427,7 +427,8 @@ def __applyCLIConfig(client: SSHClient, fgt, cfg, cli_config, silent=False):
             'ip' (str): IP address or host,
             'port' (int, optional): SSH port, default = 22
         },
-        cli_config (str): CLI commands
+        cli_config (str): CLI commands,
+        no_more (bool, optional): add dummy 'grep' to single-line commands to disable output pagination
 
     Returns:
         list[str]: CLI output (list of lines)
@@ -440,16 +441,23 @@ def __applyCLIConfig(client: SSHClient, fgt, cfg, cli_config, silent=False):
         username = cfg['fgt_user'],
         password = cfg['fgt_password'],
         timeout = timeout
-    )    
-    stdin, stdout, stderr = client.exec_command(cli_config)
+    )
+    
+    # Use 'grep' to implicitly disable output pagination (only for single-line commands)
+    if no_more and '|' not in cli_config and '\n' not in cli_config:
+        cli_config += ' | grep -v THIS_IS_DUMMY'
+    _, stdout, stderr = client.exec_command(cli_config)
 
     output = []
     start = time()
     while time() - start < timeout:
         line = stdout.readline()
         if not line: break
-        # Handle '\r' for long outputs with "--More--"
-        output.append(line[line.strip().rfind('\r')+1:])
+        output.append(line)
+
+    errors = stderr.readlines()
+    if errors:
+        raise Exception(''.join(errors))
 
     return output    
 
