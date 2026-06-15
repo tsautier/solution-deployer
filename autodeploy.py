@@ -9,7 +9,7 @@
 import argparse
 from orch_base import *
 
-DEPLOYER_VER = "7.6.x b160"
+DEPLOYER_VER = "7.6.x b170"
 
 def main():
 
@@ -17,21 +17,18 @@ def main():
 
     # Config from config.yaml
     cfg = readConfig()
-    session = getApiSession(cfg)
 
     # Command-line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '--tags', metavar="TAG1,TAG2,...",
         help='tags to execute (comma-delimited)',
-        type=lambda s: [t for t in s.split(',')],
-        default=cfg.get('default_tags', None)
+        type=lambda s: [t for t in s.split(',')]
     )
     parser.add_argument(
         '--skip-tags', metavar="TAG1,TAG2,...",
         help='tags to skip (comma-delimited)',
-        type=lambda s: [t for t in s.split(',')],
-        default=cfg.get('default_skip_tags', None)
+        type=lambda s: [t for t in s.split(',')]
     )
     parser.add_argument(
         '--tasks', metavar="NAME1,NAME2,...",
@@ -49,6 +46,10 @@ def main():
         help='more verbose output'
     )    
     args = parser.parse_args()
+    if args.tasks and (args.tags or args.skip_tags):
+        parser.error("filter tasks either by name (--tasks) or by tags (--tags, --skip-tags), but not both!")
+
+    session = getApiSession(cfg)
    
     print()
     if args.dry: print("Dry-run mode ON.")
@@ -71,15 +72,21 @@ def main():
         if args.tasks and task['name'] not in args.tasks:
             print("\033[35mSKIPPED by name\033[0m")
             continue            
-        
-        # One or more tags (comma-delimited)
-        task_tags = task.get('tag', '').split(',')
-        if args.tags and args.skip_tags:
-            args.skip_tags = [ t for t in args.skip_tags if t not in args.tags ]
-        if (args.tags and not any(tag in args.tags for tag in task_tags)) or \
-           (args.skip_tags and any(tag in args.skip_tags for tag in task_tags)):
-            print("\033[35mSKIPPED by tag\033[0m")
-            continue
+
+        # Running specific tasks (by tags)
+        if not args.tasks:
+            # Consider default values for tags and skip_tags
+            args.tags = args.tags or cfg.get('default_tags')
+            args.skip_tags = args.skip_tags or cfg.get('default_skip_tags')
+
+            # A task can have zero or more tags (comma-delimited)
+            task_tags = task.get('tag', '').split(',')
+            if args.tags and args.skip_tags:
+                args.skip_tags = [ t for t in args.skip_tags if t not in args.tags ]
+            if (args.tags and not any(tag in args.tags for tag in task_tags)) or \
+            (args.skip_tags and any(tag in args.skip_tags for tag in task_tags)):
+                print("\033[35mSKIPPED by tag\033[0m")
+                continue
 
         if args.dry: continue
 
@@ -92,6 +99,8 @@ def main():
                 deleteDevicesTask(session, task)
             elif task['type'] == 'model_devices':
                 createModelDevicesTask(session, task)
+            elif task['type'] == 'apply_cli':
+                applyCLIConfigTask(cfg, task)
             elif task['type'] == 'onboard':
                 if fail:
                     raise Exception("Skipping the onboarding, because (some of) the previous tasks failed!")
