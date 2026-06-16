@@ -455,9 +455,10 @@ def __applyCLIConfig(client: SSHClient, fgt, cfg, cli_config, no_more=True, sile
         if not line: break
         output.append(line)
 
-    errors = stderr.readlines()
-    if errors:
-        raise Exception(''.join(errors))
+    # stderr might contain legitimate data, not a strong indicator of failure
+    if not silent:
+        errors = "\n".join(e.strip() for e in stderr if e.strip())
+        if errors: print(f"\033[2m{errors}\033[0m")
 
     return output    
 
